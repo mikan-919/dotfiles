@@ -1,0 +1,6 @@
+# Template
+# <type> @ <scope>: <Title>
+#
+# Init@Repository: The first commit
+# Init@npm: setup npm
+# Init@DevContainer: setup devcontainer
