@@ -1,10 +1,14 @@
-cd `dirname $0`
+cd $(dirname $0)
 
-tput smcup
-clear
+scripts= $(find . -type f -not -name "main.sh" | sk -m)
 
-. ./packages.sh
-. ./config.sh
-. ./rust_tools.sh
+for script in $scripts; do
+  if [ -f "$script" ]; then
+    . $script
+    echo "Sourced: $script"
+  else
+    echo "File not found: $script"
+  fi
+done
 
-tput rmcup
+exit
