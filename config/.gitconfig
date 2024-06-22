@@ -1,8 +1,10 @@
 [user]
 	name = mikan-919
 	email = 131849133+mikan-919@users.noreply.github.com
+	signingkey = 002873E6EAB4B03B29A14695BB595FA374FEC3B3
 [commit]
 	template = ~/.gitmessage
+	gpgsign = true
 [init]
 	defaultBranch = main
 [core]
@@ -32,3 +34,7 @@
 
 [diff]
     colorMoved = default
+[gpg]
+	program = gpg
+[tag]
+	gpgsign = true
