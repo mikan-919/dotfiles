@@ -27,3 +27,4 @@ apply = ["defer"]
 [plugins.zsh-rcs]
 local = '~/.config/zsh-rcs'
 use = ["*.zsh", "*.zsh.zwc"]
+apply = ["defer"]

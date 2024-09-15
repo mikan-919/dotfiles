@@ -17,3 +17,4 @@ config_link .config/starship.toml
 config_link .config/sheldon/plugins.toml
 rm -rf ~/.config/zsh-rcs
 config_link .config/zsh-rcs/alias.zsh
+config_link .config/zsh-rcs/env.zsh
