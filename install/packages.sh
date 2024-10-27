@@ -9,6 +9,6 @@ sudo pacman -Syyu
 # Install Popular Packages
 sudo pacman -S --needed \
     base base-devel \
-    neovim zsh bash \
+    neovim zsh bash zed \
     wget curl git \
     rustup \

@@ -6,7 +6,7 @@
 [init]
 	defaultBranch = main
 [core]
-	editor = code --wait
+	editor = zeditor --wait
 	pager = delta
 
 [credential "https://github.com"]
