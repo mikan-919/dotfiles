@@ -16,10 +16,23 @@ shell = "zsh"
 defer = "{{ hooks | get: \"pre\" | nl }}{% for file in files %}zsh-defer source \"{{ file }}\"\n{% endfor %}{{ hooks | get: \"post\" | nl }}"
 
 [plugins]
+
+
+[plugins.nonlazy]
+local = "~/.config/zsh/nonlazy"
+
+[plugins.p10k]
+gist = "8439db6a608c3757a691245a6cc3e34b"
+
 [plugins.zsh-defer]
 github = "romkatv/zsh-defer"
-[plugins.powerlevel10k]
 
+[plugins.lazy]
+local = "~/.config/zsh/lazy"
+apply = ["defer"]
+
+
+[plugins.powerlevel10k]
 github = "romkatv/powerlevel10k"
 
 [plugins.suggestion]

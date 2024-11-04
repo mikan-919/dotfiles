@@ -38,4 +38,3 @@ setopt list_packed
 setopt no_beep
 # ファイル種別起動を補完候補の末尾に表示しない
 unsetopt list_types
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

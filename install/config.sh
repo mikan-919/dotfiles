@@ -39,3 +39,6 @@ for file in $~pattern; do
         fi
     fi
 done
+
+rm ~/.zshrc
+ln $CONFIG_DIR/.config/zsh/.zshrc $HOME/.zshrc
