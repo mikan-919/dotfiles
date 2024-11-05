@@ -1,6 +1,7 @@
 [user]
 	name = mikan-919
 	email = 131849133+mikan-919@users.noreply.github.com
+	signingkey = D44A11ED5904BCCAE942A70DE7E39489C4E05086
 [commit]
 	template = ~/.gitmessage
 [init]
@@ -10,9 +11,11 @@
 	pager = delta
 
 [credential "https://github.com"]
-	helper = !gh auth git-credential
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
 [credential "https://gist.github.com"]
-	helper = !gh auth git-credential
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
 [merge]
 	ff = false
 [pull]
