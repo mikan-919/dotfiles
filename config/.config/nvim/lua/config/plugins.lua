@@ -1,38 +1,15 @@
--- Bootstrap lazy.nvim
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
-	local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-	local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-	if vim.v.shell_error ~= 0 then
-		vim.api.nvim_echo({
-			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-			{ out, "WarningMsg" },
-			{ "\nPress any key to exit..." },
-		}, true, {})
-		vim.fn.getchar()
-		os.exit(1)
-	end
-end
-vim.opt.rtp:prepend(lazypath)
-
--- Set up leader keys before loading plugins
-vim.g.mapleader = " "
-vim.g.maplocalleader = "\\"
-
 -- Plugin setup with lazy.nvim
 require("lazy").setup({
 	spec = {
-
 		-- General utilities
 		{ "folke/which-key.nvim" }, -- Keybinding helper
 		{ "nvim-treesitter/nvim-treesitter" }, -- Syntax highlighting
 
-		-- Mason setup and LSP configurations
+		-- Mason setup and LSP configurations and Conform setup
 		{ "williamboman/mason.nvim", build = ":MasonUpdate", opts = {} },
 		{ "williamboman/mason-lspconfig.nvim" }, -- Mason LSP integration
 		{ "neovim/nvim-lspconfig" }, -- LSP configuration
-
-		-- Code formatting with conform.nvim
+		{ "zapling/mason-conform.nvim" }, -- Mason integration for conform.nvim
 		{
 			"stevearc/conform.nvim",
 			opts = {
@@ -40,7 +17,6 @@ require("lazy").setup({
 				format_on_save = { timeout_ms = 2000, lsp_fallback = true, quiet = false },
 			},
 		},
-		{ "zapling/mason-conform.nvim" }, -- Mason integration for conform.nvim
 
 		-- File navigation and icons
 		{
@@ -52,11 +28,9 @@ require("lazy").setup({
 		-- Color scheme
 		{
 			"oahlen/iceberg.nvim",
-			lazy = false,
-			priority = 1000,
 			opts = { transparent = true },
 			config = function()
-				vim.cmd([[colorscheme iceberg-light]])
+				vim.cmd([[colorscheme iceberg]])
 			end,
 		},
 
@@ -116,9 +90,7 @@ require("lazy").setup({
 		{
 			"nvim-telescope/telescope.nvim",
 			requires = { { "nvim-lua/plenary.nvim" } },
-			config = function()
-				require("telescope").setup({})
-			end,
+			ops = {},
 		},
 
 		-- Status line
@@ -127,7 +99,7 @@ require("lazy").setup({
 			requires = { "kyazdani42/nvim-web-devicons", opt = true },
 			config = function()
 				require("lualine").setup({
-					options = { theme = "iceberg_light" },
+					options = { theme = "iceberg" },
 				})
 			end,
 		},
@@ -149,15 +121,15 @@ require("lazy").setup({
 		},
 
 		-- Indentation guide
-		{
-			"lukas-reineke/indent-blankline.nvim",
-			config = function()
-				require("indent_blankline").setup({
-					char = "│",
-					show_trailing_blankline_indent = false,
-				})
-			end,
-		},
+		--		{
+		--			"lukas-reineke/indent-blankline.nvim",
+		--			config = function()
+		--				require("indent_blankline").setup({
+		--					char = "│",
+		--					show_trailing_blankline_indent = false,
+		--				})
+		--			end,
+		--		},
 
 		-- Plugin checker
 		checker = { enabled = true },

@@ -1,4 +1,4 @@
-local ZSHRC_DIR = $HOME
+ZSHRC_DIR=$HOME
 # source command override technique
 function source {
   ensure_zcompiled $1
