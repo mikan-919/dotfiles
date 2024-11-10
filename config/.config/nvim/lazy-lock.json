@@ -22,5 +22,6 @@
   "nvim-treesitter": { "branch": "master", "commit": "dfd3207ed43a0c572c13acc02bf9d7dc270f4030" },
   "plenary.nvim": { "branch": "master", "commit": "2d9b06177a975543726ce5c73fca176cedbffe9d" },
   "telescope.nvim": { "branch": "master", "commit": "85922dde3767e01d42a08e750a773effbffaea3e" },
+  "textlint": { "branch": "master", "commit": "d97b046a57ff7d6addb0039d8dcad172bfdfc6eb" },
   "which-key.nvim": { "branch": "main", "commit": "8badb359f7ab8711e2575ef75dfe6fbbd87e4821" }
 }

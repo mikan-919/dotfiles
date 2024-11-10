@@ -13,10 +13,16 @@ require("lazy").setup({
 		{
 			"stevearc/conform.nvim",
 			opts = {
-				formatters_by_ft = { lua = { "stylua" } },
+				formatters_by_ft = {
+					lua = { "stylua" },
+					markdown = { "textlint" },
+					json = { "biome" },
+				},
 				format_on_save = { timeout_ms = 2000, lsp_fallback = true, quiet = false },
 			},
 		},
+
+		{ "textlint/textlint" },
 
 		-- File navigation and icons
 		{
