@@ -17,20 +17,14 @@ defer = "{{ hooks | get: \"pre\" | nl }}{% for file in files %}zsh-defer source 
 
 [plugins]
 
-
-[plugins.nonlazy]
-local = "~/.config/zsh/nonlazy"
+[plugins.zsh-defer]
+github = "romkatv/zsh-defer"
 
 [plugins.p10k]
 gist = "8439db6a608c3757a691245a6cc3e34b"
 
-[plugins.zsh-defer]
-github = "romkatv/zsh-defer"
-
-[plugins.lazy]
-local = "~/.config/zsh/lazy"
-apply = ["defer"]
-
+[plugins.nonlazy]
+local = "~/.config/zsh/nonlazy"
 
 [plugins.powerlevel10k]
 github = "romkatv/powerlevel10k"
@@ -42,3 +36,8 @@ apply = ["defer"]
 [plugins.syntax-highlight]
 github = "zsh-users/zsh-syntax-highlighting"
 apply = ["defer"]
+
+[plugins.lazy]
+local = "~/.config/zsh/lazy"
+apply = ["defer"]
+use = ["*.zsh"]
