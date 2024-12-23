@@ -1,7 +1,7 @@
 [user]
 	name = mikan-919
 	email = 131849133+mikan-919@users.noreply.github.com
-	signingkey = 2B07A7EAE1FB438FBEBE05264200EE2591E8E8E7
+	signingkey = 22BDB514BB64848C4AA15650ADBE0D315E2C3765
 [commit]
 	template = ~/.gitmessage
 [init]

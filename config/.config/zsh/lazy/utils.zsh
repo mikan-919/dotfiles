@@ -3,10 +3,9 @@ code_cache() {
   local generate_command="$3"
 
   eval "$generate_command" > "${cache_file}"
-  source cache_file
+  builtin source $cache_file
 }
 code_cache mise.zsh "mise activate zsh"
 code_cache zxoxide.zsh "zoxide init zsh"
-
 
 autoload -Uz compinit; compinit
