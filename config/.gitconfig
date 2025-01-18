@@ -7,7 +7,7 @@
 [init]
 	defaultBranch = main
 [core]
-	editor = zed --wait
+	editor =nvim 
 	pager = delta
 
 [credential "https://github.com"]
