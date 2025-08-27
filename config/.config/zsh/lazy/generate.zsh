@@ -8,4 +8,3 @@ code_cache() {
 code_cache mise.zsh "mise activate zsh"
 code_cache zxoxide.zsh "zoxide init zsh"
 
-autoload -Uz compinit; compinit
