@@ -1,7 +1,6 @@
 source "/home/mikan/.local/share/sheldon/repos/github.com/romkatv/zsh-defer/zsh-defer.plugin.zsh"
-zsh-defer source "/home/mikan/.local/share/sheldon/repos/gist.github.com/8439db6a608c3757a691245a6cc3e34b/.p10k.zsh"
-zsh-defer source "/home/mikan/.local/share/sheldon/repos/github.com/romkatv/powerlevel10k/powerlevel10k.zsh-theme"
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+zsh-defer source "/home/mikan/.local/share/sheldon/repos/github.com/romkatv/powerlevel10k/powerlevel10k.zsh-theme"
 zsh-defer source "/home/mikan/.config/zsh/lazy/alias.zsh"
 zsh-defer source "/home/mikan/.config/zsh/lazy/compile.zsh"
 zsh-defer source "/home/mikan/.config/zsh/lazy/env.zsh"

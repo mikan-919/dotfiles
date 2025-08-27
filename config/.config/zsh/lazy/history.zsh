@@ -2,8 +2,8 @@
 # メモリに保存される履歴の件数
 # 履歴ファイルに保存される履歴の件数
 export HISTFILE=${HOME}/.config/zsh/.zsh_history
-export HISTSIZE=1000
-export SAVEHIST=100000
+HISTSIZE=50000
+SAVEHIST=50000
 export HISTFILESIZE=100000
 # 重複を記録しない
 # 開始と終了を記録
@@ -25,3 +25,4 @@ setopt hist_save_no_dups
 setopt hist_no_store
 setopt hist_expand
 setopt share_history
+setopt inc_append_history
