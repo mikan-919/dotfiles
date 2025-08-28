@@ -8,5 +8,5 @@ setopt list_packed
 setopt no_beep
 # ファイル種別起動を補完候補の末尾に表示しない
 unsetopt list_types
-bindkey '^[[A' history-substring-search-up
-bindkey '^[[B' history-substring-search-down
+# bindkey '^[[A' history-substring-search-up
+# bindkey '^[[B' history-substring-search-down

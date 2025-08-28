@@ -28,6 +28,11 @@ pre = "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh"
 
 # [plugins.nonlazy]
 # local = "~/.config/zsh/nonlazy"
+[plugins.zsh-completions]
+github = "zsh-users/zsh-completions"
+apply = ["defer"]
+# [plugins.zsh-completions.hooks]
+# post = ""
 
 [plugins.lazy]
 local = "~/.config/zsh/lazy"
@@ -43,18 +48,18 @@ apply = ["defer"]
 github = "zsh-users/zsh-syntax-highlighting"
 apply = ["defer"]
 
-[plugins.zsh-completions]
-github = "zsh-users/zsh-completions"
-apply = ["defer"]
 
 [plugins.git-open]
 github = "paulirish/git-open"
 apply = ["defer"]
 
-[plugins.fzf-tab]
-github = "Aloxaf/fzf-tab"
+[plugins.autopair]
+github = "hlissner/zsh-autopair"
 apply = ["defer"]
+# [plugins.fzf-tab]
+# github = "Aloxaf/fzf-tab"
+# apply = ["defer"]
 
-[plugins.fzf]
-github = "junegunn/fzf"
-apply = ["defer"]
+# [plugins.fzf]
+# github = "junegunn/fzf"
+# apply = ["defer"]
