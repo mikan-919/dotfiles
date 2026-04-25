@@ -1,0 +1,9 @@
+base
+base-devel
+chezmoi
+git
+helix
+mise
+neovim
+sheldon
+zsh
