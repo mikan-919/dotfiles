@@ -1,9 +1,11 @@
 base
 base-devel
 chezmoi
+erdtree
 git
 helix
 mise
 neovim
 sheldon
+starship
 zsh

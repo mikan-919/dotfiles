@@ -1,0 +1,37 @@
+[user]
+	name = mikan-919
+	email = 131849133+mikan-919@users.noreply.github.com
+	signingkey = 22BDB514BB64848C4AA15650ADBE0D315E2C3765
+[commit]
+	template = ~/.gitmessage
+[init]
+	defaultBranch = main
+[core]
+	editor =nvim 
+	pager = delta
+
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[merge]
+	ff = false
+[pull]
+	ff = only
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true    # use n and N to move between diff sections
+
+    # delta detects terminal colors automatically; set one of these to disable auto-detection
+    # dark = true
+    # light = true
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    colorMoved = default
