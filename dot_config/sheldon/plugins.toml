@@ -22,6 +22,13 @@ inline = 'eval "$(starship init zsh)"'
 [plugins.mise]
 inline = 'eval "$(mise activate zsh)"'
 
+[plugins.fzf-scripts]
+github = "junegunn/fzf"
+use = ["shell/key-bindings.zsh", "shell/completion.zsh"]
+
+[plugins.fzf-tab]
+github = "Aloxaf/fzf-tab"
+
 [plugins.zsh-autosuggestions]
 github = "zsh-users/zsh-autosuggestions"
 use = ["{{ name }}.zsh"]
