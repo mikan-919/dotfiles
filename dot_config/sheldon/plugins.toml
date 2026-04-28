@@ -1,28 +1,32 @@
 shell = "zsh"
 
+[templates]
+defer = "{{ hooks?.pre | nl }}{% for file in files %}zsh-defer source \"{{ file }}\"\n{% endfor %}{{ hooks?.post | nl }}"
+
 [plugins.zsh-defer]
 github = "romkatv/zsh-defer"
 
-[templates]
-defer = "{{ hooks?.pre | nl }}{% for file in files %}zsh-defer source \"{{ file }}\"\n{% endfor %}{{ hooks?.post | nl }}"
 [plugins.compinit]
 inline = "autoload -Uz compinit && compinit"
 
-# タイプ時の補完表示
+[plugins.config-sync]
+local = "~/.config/zsh/sync"
+
+[plugins.config-async]
+local = "~/.config/zsh/async"
+apply = ["defer"]
+
+[plugins.starship]
+inline = 'eval "$(starship init zsh)"'
+
+[plugins.mise]
+inline = 'eval "$(mise activate zsh)"'
+
 [plugins.zsh-autosuggestions]
 github = "zsh-users/zsh-autosuggestions"
 use = ["{{ name }}.zsh"]
 apply = ["defer"]
 
-# Starship Prompt
-[plugins.starship]
-inline = 'eval "$(starship init zsh)"'
-
-# Mise (実行環境をまとめるやつ)
-[plugins.mise]
-inline = 'eval "$(mise activate zsh)"'
-
-# コマンドが存在するかとかのカラー表示
 [plugins.zsh-syntax-highlighting]
 github = "zsh-users/zsh-syntax-highlighting"
 apply = ["defer"]

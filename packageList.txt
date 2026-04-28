@@ -3,6 +3,7 @@ base-devel
 chezmoi
 erdtree
 git
+github-cli
 helix
 mise
 neovim
