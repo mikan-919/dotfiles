@@ -20,10 +20,26 @@
 - 1回の最大語数を指定可能（無料/有料の線引きの土台）
 - Anki取り込み用CSV書き出し（`#separator:Comma` / `#html:true` ディレクティブ付き、Front/Back の2フィールド）
 
-## 動かし方
+## 2つの版
+
+| ファイル | 用途 | AI呼び出し | APIキー |
+|---|---|---|---|
+| `SentenceMiner.jsx` | **claude.ai アーティファクト版**（推奨） | `window.claude.complete()` | 不要 |
+| `index.html` | スタンドアロン版（ブラウザで直接開く） | Claude Messages API を直接 fetch | 必要 |
+
+## アーティファクト版（`SentenceMiner.jsx`）
+
+claude.ai のチャットに「これをアーティファクトにして」とこのファイルの内容を渡せば、
+そのまま React アーティファクトとして動きます。
+
+- AI抽出はアーティファクト組み込みの `window.claude.complete(prompt)` を使用 → **APIキー不要**。
+- JSON だけを返すようプロンプトで指示し、コードフェンス混在にも耐える防御的パースで取り込む。
+- アーティファクト制約に合わせて localStorage/sessionStorage は不使用。
+- 記事URL取得は `https://r.jina.ai/<url>` 経由（サンドボックス環境では取得できない場合あり）。
+
+## スタンドアロン版（`index.html`）
 
 1. ブラウザでこの `index.html` を開くだけ（ビルド不要）。
-   - ローカルファイルで動きます。CDN（Tailwind）に到達できれば見た目も整います。
 2. 右上の「APIキー設定」で Anthropic の API キーを入力。
    - キーはブラウザの sessionStorage にのみ保存（タブを閉じると消える）。サーバーには送りません。
 3. 英文を貼って「カードを生成」。
