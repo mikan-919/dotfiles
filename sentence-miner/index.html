@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sentence Miner — 英語の用例から覚える単語カードを作る</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  /* 落ち着いた読みやすいトーン。学習ツールらしく派手すぎないように。 */
+  body { font-feature-settings: "palt"; }
+  .card-front { font-size: 1.05rem; line-height: 1.7; }
+  textarea { tab-size: 2; }
+  /* スクロールバーを控えめに */
+  textarea::-webkit-scrollbar { width: 10px; }
+  textarea::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+  mark.kw { background: #fde68a; padding: 0 .12em; border-radius: 3px; }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+<header class="border-b border-slate-200 bg-white">
+  <div class="max-w-5xl mx-auto px-5 py-4 flex items-center justify-between">
+    <div>
+      <h1 class="text-xl font-bold tracking-tight">Sentence Miner</h1>
+      <p class="text-sm text-slate-500">英文を貼る → レベルに合う語をAIが抽出 → 用例つきカード → Anki用CSVで書き出し</p>
+    </div>
+    <button id="settingsBtn" class="text-sm text-slate-500 hover:text-slate-800 underline underline-offset-2">APIキー設定</button>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-5 py-6 grid gap-6 lg:grid-cols-[380px_1fr]">
+
+  <!-- 入力パネル -->
+  <section class="space-y-5">
+    <div class="bg-white rounded-xl border border-slate-200 p-4 space-y-4">
+      <div>
+        <label class="block text-sm font-semibold mb-1.5">ソース</label>
+        <div class="flex gap-1 mb-2 text-sm">
+          <button data-tab="paste" class="srcTab px-3 py-1.5 rounded-md bg-slate-800 text-white">テキスト貼り付け</button>
+          <button data-tab="url" class="srcTab px-3 py-1.5 rounded-md bg-slate-100 text-slate-600">記事URL</button>
+        </div>
+
+        <div id="pastePane">
+          <textarea id="sourceText" rows="9"
+            class="w-full rounded-lg border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+            placeholder="英語のテキストをここに貼り付け（記事・本の一節・ドラマの字幕など）"></textarea>
+        </div>
+
+        <div id="urlPane" class="hidden space-y-2">
+          <input id="sourceUrl" type="url"
+            class="w-full rounded-lg border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+            placeholder="https://example.com/article" />
+          <p class="text-xs text-slate-500">記事本文を取得してから抽出します（取得には数秒かかります）。</p>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold mb-1.5">あなたのレベル</label>
+        <select id="level" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm bg-white">
+          <option value="A2">A2 / TOEIC 〜450（基礎）</option>
+          <option value="B1" selected>B1 / TOEIC 〜600（中級）</option>
+          <option value="B2">B2 / TOEIC 〜800（中上級）</option>
+          <option value="C1">C1 / TOEIC 860+（上級）</option>
+        </select>
+        <p class="text-xs text-slate-500 mt-1">これより易しい語は除外して、覚える価値のある語だけを選びます。</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold mb-1.5">もう知っている単語（重複除外）</label>
+        <textarea id="knownWords" rows="3"
+          class="w-full rounded-lg border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+          placeholder="カンマ・改行区切りで入力（例: although, nevertheless, robust）"></textarea>
+      </div>
+
+      <div class="flex items-center justify-between gap-3">
+        <label class="text-sm font-semibold">最大カード数</label>
+        <input id="maxCards" type="number" min="1" max="50" value="12"
+          class="w-20 rounded-lg border border-slate-300 p-2 text-sm text-center" />
+      </div>
+
+      <label class="flex items-center gap-2 text-sm">
+        <input id="wordOnly" type="checkbox" class="rounded border-slate-300" />
+        <span>単語単体カードも作る（既定は文ごとカード）</span>
+      </label>
+
+      <button id="generateBtn"
+        class="w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+        カードを生成
+      </button>
+      <p id="status" class="text-sm text-center text-slate-500 min-h-[1.25rem]"></p>
+    </div>
+  </section>
+
+  <!-- 結果パネル -->
+  <section>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-base font-semibold">カード <span id="cardCount" class="text-slate-400 font-normal"></span></h2>
+      <div class="flex gap-2">
+        <button id="exportBtn"
+          class="text-sm rounded-lg border border-slate-300 bg-white px-3 py-1.5 hover:bg-slate-100 disabled:opacity-40"
+          disabled>Anki用CSVで書き出し</button>
+      </div>
+    </div>
+
+    <div id="empty" class="text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl py-20">
+      まだカードはありません。左側で英文を貼って「カードを生成」を押してください。
+    </div>
+
+    <div id="cards" class="space-y-3"></div>
+  </section>
+</main>
+
+<!-- APIキー設定モーダル -->
+<div id="settingsModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-xl max-w-md w-full p-5 space-y-4">
+    <h3 class="font-semibold text-lg">Anthropic APIキー</h3>
+    <p class="text-sm text-slate-600">
+      このプロトタイプはブラウザから直接 Claude API を呼びます。キーはこのブラウザの sessionStorage にのみ保存され、サーバーには送られません（タブを閉じると消えます）。
+    </p>
+    <input id="apiKeyInput" type="password" placeholder="sk-ant-..."
+      class="w-full rounded-lg border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400" />
+    <div class="flex justify-end gap-2">
+      <button id="cancelKey" class="text-sm px-4 py-2 rounded-lg hover:bg-slate-100">キャンセル</button>
+      <button id="saveKey" class="text-sm px-4 py-2 rounded-lg bg-slate-800 text-white">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 設定 =====
+// モデル: 語彙抽出は高頻度・コスト重視の処理なので、前セッションで合意した
+// claude-sonnet-4-6 を既定とする。より高精度が必要なら claude-opus-4-8 に変更可。
+const MODEL = "claude-sonnet-4-6";
+const API_URL = "https://api.anthropic.com/v1/messages";
+
+// ===== 状態 =====
+let cards = [];
+
+// ===== DOM =====
+const $ = (id) => document.getElementById(id);
+const statusEl = $("status");
+
+// ===== APIキー管理 =====
+function getKey() { return sessionStorage.getItem("anthropic_key") || ""; }
+function openSettings() {
+  $("apiKeyInput").value = getKey();
+  $("settingsModal").classList.remove("hidden");
+}
+$("settingsBtn").onclick = openSettings;
+$("cancelKey").onclick = () => $("settingsModal").classList.add("hidden");
+$("saveKey").onclick = () => {
+  sessionStorage.setItem("anthropic_key", $("apiKeyInput").value.trim());
+  $("settingsModal").classList.add("hidden");
+};
+
+// ===== ソースタブ切替 =====
+document.querySelectorAll(".srcTab").forEach((btn) => {
+  btn.onclick = () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll(".srcTab").forEach((b) => {
+      const on = b.dataset.tab === tab;
+      b.classList.toggle("bg-slate-800", on);
+      b.classList.toggle("text-white", on);
+      b.classList.toggle("bg-slate-100", !on);
+      b.classList.toggle("text-slate-600", !on);
+    });
+    $("pastePane").classList.toggle("hidden", tab !== "paste");
+    $("urlPane").classList.toggle("hidden", tab !== "url");
+  };
+});
+
+// ===== 記事URLから本文を取得（r.jina.ai リーダー経由でCORSを回避） =====
+async function fetchArticle(url) {
+  const reader = "https://r.jina.ai/" + url;
+  const res = await fetch(reader);
+  if (!res.ok) throw new Error("記事の取得に失敗しました (" + res.status + ")");
+  const text = await res.text();
+  return text.slice(0, 12000); // 入力過多を防ぐためトリム
+}
+
+// ===== Claude API で語を抽出してカード化 =====
+const SCHEMA = {
+  type: "object",
+  properties: {
+    cards: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          word: { type: "string" },
+          sentence: { type: "string" },
+          meaning_ja: { type: "string" },
+          example_en: { type: "string" },
+          example_ja: { type: "string" },
+          cefr: { type: "string", enum: ["A1", "A2", "B1", "B2", "C1", "C2"] },
+        },
+        required: ["word", "sentence", "meaning_ja", "example_en", "example_ja", "cefr"],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ["cards"],
+  additionalProperties: false,
+};
+
+function buildSystemPrompt(level, known, maxCards) {
+  return [
+    "あなたは日本語話者の英語学習を助けるセンテンスマイニングのアシスタントです。",
+    "与えられた英文から、学習者が覚える価値のある語・熟語（コロケーションや句動詞を含む）を選び、用例つきの単語カードを作ります。",
+    "",
+    "選定ルール:",
+    `- 学習者のレベルは CEFR ${level} 相当。これより明確に易しい基礎語（中学レベルの超頻出語など）は選ばない。`,
+    "- 文中に実際に出てくる語だけを対象にする。活用形でも、その文脈での意味を正しく捉える。",
+    "- 固有名詞・数字・記号は除外する。",
+    known
+      ? "- 次の『既知語リスト』に含まれる語、およびその活用形・派生語は除外する: " + known
+      : "",
+    `- カードは最大 ${maxCards} 件。価値の高い順に選ぶ。`,
+    "",
+    "各カードの内容:",
+    "- word: 見出し語（基本形・lemma）。句動詞や熟語ならそのまとまり。",
+    "- sentence: その語を含む、元テキストの実際の一文（カードの表）。",
+    "- meaning_ja: その文脈に即した自然な日本語の意味（辞書の丸写しでなく文脈優先）。",
+    "- example_en: その語を使った、元文とは別の自然な新しい例文。",
+    "- example_ja: example_en の自然な日本語訳。",
+    "- cefr: その語のおおよその難易度（A1〜C2）。",
+  ].filter(Boolean).join("\n");
+}
+
+async function generate() {
+  const key = getKey();
+  if (!key) { openSettings(); return; }
+
+  const isUrl = !$("urlPane").classList.contains("hidden");
+  const level = $("level").value;
+  const known = $("knownWords").value.trim().replace(/\s+/g, " ");
+  const maxCards = Math.min(50, Math.max(1, parseInt($("maxCards").value) || 12));
+  const wordOnly = $("wordOnly").checked;
+
+  let text = "";
+  try {
+    if (isUrl) {
+      const url = $("sourceUrl").value.trim();
+      if (!url) { setStatus("記事URLを入力してください。", true); return; }
+      setStatus("記事を取得中…");
+      text = await fetchArticle(url);
+    } else {
+      text = $("sourceText").value.trim();
+    }
+  } catch (e) {
+    setStatus(e.message, true);
+    return;
+  }
+
+  if (!text) { setStatus("英文を入力してください。", true); return; }
+
+  $("generateBtn").disabled = true;
+  setStatus("AIが語を抽出中…（10〜30秒ほど）");
+
+  const body = {
+    model: MODEL,
+    max_tokens: 8000,
+    output_config: { format: { type: "json_schema", schema: SCHEMA } },
+    system: buildSystemPrompt(level, known, maxCards),
+    messages: [{ role: "user", content: "次の英文からカードを作ってください。\n\n---\n" + text }],
+  };
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error("API エラー " + res.status + ": " + (err.error?.message || res.statusText));
+    }
+
+    const data = await res.json();
+    if (data.stop_reason === "refusal") {
+      throw new Error("リクエストが拒否されました。入力内容を見直してください。");
+    }
+    const textBlock = data.content.find((b) => b.type === "text");
+    const parsed = JSON.parse(textBlock.text);
+    cards = (parsed.cards || []).map((c) => ({ ...c, wordOnly }));
+    render();
+    setStatus(cards.length ? `${cards.length} 件のカードを生成しました。` : "覚える価値のある語が見つかりませんでした。");
+  } catch (e) {
+    setStatus(e.message, true);
+  } finally {
+    $("generateBtn").disabled = false;
+  }
+}
+$("generateBtn").onclick = generate;
+
+function setStatus(msg, isErr) {
+  statusEl.textContent = msg;
+  statusEl.className = "text-sm text-center min-h-[1.25rem] " + (isErr ? "text-red-600" : "text-slate-500");
+}
+
+// ===== レンダリング =====
+function highlight(sentence, word) {
+  // 語の最初の単語を文中で軽くハイライト（活用差があっても先頭一致で目印に）
+  const head = (word || "").split(/\s+/)[0].replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  if (!head) return escapeHtml(sentence);
+  const re = new RegExp("\\b(" + head + "\\w*)\\b", "i");
+  const esc = escapeHtml(sentence);
+  return esc.replace(re, '<mark class="kw">$1</mark>');
+}
+
+function escapeHtml(s) {
+  return (s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+function render() {
+  const wrap = $("cards");
+  $("empty").classList.toggle("hidden", cards.length > 0);
+  $("cardCount").textContent = cards.length ? `(${cards.length})` : "";
+  $("exportBtn").disabled = cards.length === 0;
+
+  wrap.innerHTML = cards.map((c, i) => {
+    const front = c.wordOnly ? escapeHtml(c.word) : highlight(c.sentence, c.word);
+    return `
+    <div class="bg-white rounded-xl border border-slate-200 p-4">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="font-semibold text-emerald-700">${escapeHtml(c.word)}</span>
+          <span class="text-xs px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">${escapeHtml(c.cefr)}</span>
+        </div>
+        <button data-del="${i}" class="text-slate-300 hover:text-red-500 text-sm" title="削除">✕</button>
+      </div>
+      <p class="card-front mt-2">${front}</p>
+      <div class="mt-3 grid gap-2 text-sm border-t border-slate-100 pt-3">
+        <div><span class="text-slate-400">意味</span> ${escapeHtml(c.meaning_ja)}</div>
+        <div><span class="text-slate-400">例文</span> ${escapeHtml(c.example_en)}</div>
+        <div><span class="text-slate-400">訳</span> ${escapeHtml(c.example_ja)}</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  wrap.querySelectorAll("[data-del]").forEach((b) => {
+    b.onclick = () => { cards.splice(+b.dataset.del, 1); render(); };
+  });
+}
+
+// ===== Anki用CSV書き出し =====
+function csvField(s) {
+  // ダブルクォートで囲み、内部のクォートはエスケープ
+  return '"' + String(s ?? "").replace(/"/g, '""') + '"';
+}
+
+function exportCsv() {
+  if (!cards.length) return;
+  // Anki のインポート用ディレクティブ。表=front、裏=back、HTML有効。
+  const lines = ["#separator:Comma", "#html:true", "#columns:Front,Back"];
+  for (const c of cards) {
+    const front = c.wordOnly
+      ? `<b>${escapeHtml(c.word)}</b>`
+      : highlight(c.sentence, c.word);
+    const back = [
+      `<b>${escapeHtml(c.word)}</b>（${escapeHtml(c.cefr)}）`,
+      escapeHtml(c.meaning_ja),
+      `<br><i>${escapeHtml(c.example_en)}</i>`,
+      escapeHtml(c.example_ja),
+    ].join("<br>");
+    lines.push(csvField(front) + "," + csvField(back));
+  }
+  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "sentence-miner-" + new Date().toISOString().slice(0, 10) + ".csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+$("exportBtn").onclick = exportCsv;
+</script>
+</body>
+</html>
