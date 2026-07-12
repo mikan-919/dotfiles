@@ -1,0 +1,63 @@
+{
+  "permissions": {
+    "defaultMode": "default",
+    "allow":[
+      "Bash(cd *)",
+    "Bash(cat *)",
+    "Bash(ls *)",
+    "Bash(git *)",
+    "Bash(grep *)",
+    "Bash(find *)",
+    "Bash(sed *)",
+    "Bash(echo *)",
+    "Bash(tail *)",
+    "Bash(head *)",
+    "Bash(wc *)",
+    "Bash(mkdir *)",
+    "Bash(cp *)",
+    "Bash(true *)",
+    "Bash(gh *)",
+    "Bash(cargo *)",
+    "Bash(uv *)",
+    "Bash(mise *)",
+    "Bash(pgrep *)",
+    "Bash(sleep *)",
+    "Bash(timeout *)",
+    "Bash(rm *)",
+
+    "Bash(bun *)",
+    "Bash(bunx *)",
+    "Bash(curl *)",
+    "WebSearch",
+    "WebFetch",
+    "Skill"
+    ]
+  },
+  "model": "sonnet",
+  "statusLine": {
+    "type": "command",
+    "command": "bash /home/mikan/.claude/statusline-command.sh",
+    "refreshInterval": 1
+  },
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "ponytail@ponytail": true,
+    "frontend-design@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    }
+  },
+  "effortLevel": "high",
+  "theme": "auto",
+  "verbose": false,
+  "remoteControlAtStartup": true,
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true
+}
