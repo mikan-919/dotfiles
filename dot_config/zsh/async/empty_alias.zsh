@@ -49,7 +49,7 @@ gaac() { git add -A && gac "$@"; }
 
 alias reload="source ~/.zshrc"
 claude-local() {
-  ANTHROPIC_BASE_URL="http://127.0.0.1:1234/v1" \
+  ANTHROPIC_BASE_URL="http://192.168.0.18:1234" \
   ANTHROPIC_AUTH_TOKEN="lm-studio" \
   claude --model ornith-1.0-35b "$@"
 }
