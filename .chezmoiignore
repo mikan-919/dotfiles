@@ -1,1 +1,2 @@
-packageList.txt
+packageList.*.txt
+nixos/
