@@ -1,13 +1,17 @@
-#!/bin/bash
+{{- if eq .chezmoi.osRelease.id "arch" }}
+#!/usr/bin/env bash
+set -euo pipefail
 
-# packageList.txt hash: {{ include "packageList.txt" | sha256sum }}
-# This script runs whenever packageList.txt changes.
+# packageList.arch.txt hash: {{ include "packageList.arch.txt" | sha256sum }}
+# This script is rendered and run only on Arch Linux.
 
 echo "Checking for missing packages..."
 
 # Read the list and install missing packages
 # Using --needed to skip already installed ones
-MISSING_PACKAGES=$(comm -23 <(sort ~/dotfiles/packageList.txt) <(paru -Qq | sort))
+MISSING_PACKAGES=$(comm -23 \
+    <(sort {{ .chezmoi.sourceDir | quote }}/packageList.arch.txt) \
+    <(paru -Qq | sort))
 
 if [ -n "$MISSING_PACKAGES" ]; then
     echo "Installing: $MISSING_PACKAGES"
@@ -16,3 +20,4 @@ if [ -n "$MISSING_PACKAGES" ]; then
 else
     echo "All packages are already installed."
 fi
+{{- end }}

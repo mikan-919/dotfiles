@@ -1,1 +1,6 @@
 export EDITOR=helix
+
+# The NixOS-generated /etc/zshrc duplicates completion and prompt setup from
+# the user configuration. /etc/zshenv is still loaded, so Nix paths and fpath
+# remain available.
+setopt no_global_rcs

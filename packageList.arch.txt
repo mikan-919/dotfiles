@@ -15,6 +15,8 @@ git
 git-delta
 github-cli
 helix
+hyperfine
+jq
 libx11
 libxcursor
 libxinerama
@@ -35,6 +37,7 @@ pipewire-alsa
 pipewire-pulse
 reflector
 repomix
+sccache
 sheldon
 starship
 unzip

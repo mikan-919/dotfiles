@@ -7,7 +7,19 @@ defer = "{{ hooks?.pre | nl }}{% for file in files %}zsh-defer source \"{{ file 
 github = "romkatv/zsh-defer"
 
 [plugins.compinit]
-inline = "autoload -Uz compinit && compinit"
+inline = '''
+autoload -Uz compinit
+
+# compaudit is relatively expensive. Check it once a day, while continuing to
+# load the existing completion dump on every shell startup.
+zcompdump_old=("${ZDOTDIR:-$HOME}"/.zcompdump(N.mh+24))
+if (( $#zcompdump_old )); then
+  compinit
+else
+  compinit -C
+fi
+unset zcompdump_old
+'''
 
 [plugins.config-sync]
 local = "~/.config/zsh/sync"
@@ -20,7 +32,11 @@ apply = ["defer"]
 inline = 'eval "$(starship init zsh)"'
 
 [plugins.mise]
-inline = 'eval "$(mise activate zsh)"'
+inline = '''
+# mise's initial environment scan is expensive and isn't needed to draw the
+# first prompt. Run it as soon as ZLE becomes idle.
+zsh-defer -c 'eval "$(mise activate zsh)"'
+'''
 
 [plugins.fzf-scripts]
 github = "junegunn/fzf"
