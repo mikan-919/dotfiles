@@ -1,2 +1,4 @@
 packageList.*.txt
 nixos/
+flake.nix
+flake.lock

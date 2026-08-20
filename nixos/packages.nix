@@ -1,6 +1,9 @@
 { pkgs, ... }:
 
 {
+  # Enable the modern Nix CLI used by `nix run`, `nix shell`, and flakes.
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
   # Packages shared by the NixOS machines using these dotfiles.
   # Project-specific language versions are managed by mise.
   environment.systemPackages = with pkgs; [
@@ -9,6 +12,8 @@
     chezmoi
     clang
     cmake
+    codex
+    curl
     delta
     erdtree
     fastfetch

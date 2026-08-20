@@ -56,7 +56,10 @@ git -C "$(ghq list --full-path | grep '/mikan-919/dotfiles$')" push
 | `dot_config/zsh/async/` | `zsh-defer` で遅延読み込みする zsh 設定 |
 | `packageList.arch.txt` | Arch Linux用パッケージ一覧 |
 | `run_onchange_installPackages.sh.tmpl` | Archでのみ不足パッケージを自動インストール |
-| `nixos/packages.nix` | NixOS用パッケージとシェル設定 |
+| `flake.nix` / `flake.lock` | NixOSと外部入力の宣言・バージョン固定 |
+| `nixos/configuration.nix` | NixOS-WSLのホスト設定 |
+| `nixos/packages.nix` | 共通CLIパッケージとシェル設定 |
+| `nixos/wayland.nix` | Niri、Noctalia、GUIアプリ、デスクトップ用フォント |
 
 ## OS別のセットアップ
 
@@ -67,19 +70,15 @@ chezmoiの適用時に `packageList.arch.txt` を参照し、`paru` で不足パ
 
 ### NixOS
 
-`/etc/nixos/configuration.nix` の `imports` にNixOSモジュールを追加します。
+このリポジトリのflakeからNixOS設定を反映します。
 
-```nix
-imports = [
-  <nixos-wsl/modules>
-  /home/nixos/ghq/github.com/mikan-919/dotfiles/nixos/packages.nix
-];
-```
-
-その後、設定を反映してdotfilesを適用します。
+NixOS-WSL、nixpkgs、Noctalia、Zen Browserのバージョンは `flake.lock` で固定されます。
+NiriとNoctalia、Ghostty、Zen Browser、基本的なGUIアプリ、デスクトップ用フォントは
+`nixos/wayland.nix` で管理します。
 
 ```sh
-sudo nixos-rebuild switch
+cd "$(ghq list --full-path | grep '/mikan-919/dotfiles$')"
+sudo nixos-rebuild switch --flake .#nixos
 chezmoi init --source "$(ghq list --full-path | grep '/mikan-919/dotfiles$')"
 chezmoi diff
 chezmoi apply
