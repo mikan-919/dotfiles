@@ -1,0 +1,40 @@
+# Noctalia is the single source of truth for desktop colors.
+[shell]
+font_family = "Noto Sans CJK JP"
+telemetry_enabled = false
+settings_show_advanced = true
+
+[shell.animation]
+enabled = true
+speed = 1.15
+
+[shell.panel]
+transparency_mode = "glass"
+borders = true
+shadow = true
+launcher_placement = "floating"
+clipboard_placement = "floating"
+launcher_position = "center"
+clipboard_position = "center"
+
+[theme]
+mode = "dark"
+source = "builtin"
+builtin = "Kanagawa"
+pure_black_dark = false
+
+[theme.templates]
+enable_builtin_templates = true
+builtin_ids = ["gtk3", "gtk4", "ghostty", "helix", "qt", "starship"]
+enable_community_templates = true
+community_ids = ["fuzzel", "zen-browser"]
+
+[notification]
+enable_daemon = true
+background_opacity = 0.94
+
+[wallpaper]
+enabled = true
+fill_mode = "crop"
+transition = ["fade", "wipe", "zoom"]
+transition_duration = 900

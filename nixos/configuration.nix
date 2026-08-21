@@ -8,6 +8,11 @@
 
   wsl = {
     enable = true;
+    interop.register = true;
+    wslConf.interop = {
+      enabled = true;
+      appendWindowsPath = true;
+    };
     defaultUser = "nixos";
   };
 

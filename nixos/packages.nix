@@ -1,16 +1,20 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   # Enable the modern Nix CLI used by `nix run`, `nix shell`, and flakes.
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (lib.getName pkg) [ "claude-code" ];
+
   # Packages shared by the NixOS machines using these dotfiles.
-  # Project-specific language versions are managed by mise.
   environment.systemPackages = with pkgs; [
     bat
     bottom
+    bun
     chezmoi
     clang
+    claude-code
     cmake
     codex
     curl
@@ -22,10 +26,10 @@
     ghq
     git
     helix
+    herdr
     hyperfine
     jq
     lld
-    mise
     mold
     neovim
     ninja
@@ -35,6 +39,7 @@
     sheldon
     starship
     unzip
+    uv
     wget
     zsh
   ];

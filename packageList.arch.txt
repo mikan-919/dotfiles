@@ -24,7 +24,6 @@ libxkbcommon
 lld
 mesa-demos
 mingw-w64-gcc
-mise
 mold
 neovim
 ninja

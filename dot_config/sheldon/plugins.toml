@@ -31,13 +31,6 @@ apply = ["defer"]
 [plugins.starship]
 inline = 'eval "$(starship init zsh)"'
 
-[plugins.mise]
-inline = '''
-# mise's initial environment scan is expensive and isn't needed to draw the
-# first prompt. Run it as soon as ZLE becomes idle.
-zsh-defer -c 'eval "$(mise activate zsh)"'
-'''
-
 [plugins.fzf-scripts]
 github = "junegunn/fzf"
 use = ["shell/key-bindings.zsh", "shell/completion.zsh"]

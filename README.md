@@ -59,7 +59,11 @@ git -C "$(ghq list --full-path | grep '/mikan-919/dotfiles$')" push
 | `flake.nix` / `flake.lock` | NixOSと外部入力の宣言・バージョン固定 |
 | `nixos/configuration.nix` | NixOS-WSLのホスト設定 |
 | `nixos/packages.nix` | 共通CLIパッケージとシェル設定 |
-| `nixos/wayland.nix` | Niri、Noctalia、GUIアプリ、デスクトップ用フォント |
+| `nixos/wayland.nix` | Niri、Noctalia、GUIアプリ、Wayland基盤、デスクトップ用フォント |
+| `dot_config/niri/config.kdl` | Niriの起動項目、外観、キーバインド |
+| `dot_config/noctalia/config.toml` | デスクトップ全体の配色源とテーマ配布設定 |
+| `dot_config/ghostty/config.ghostty` | Ghosttyのフォント、外観、Noctaliaテーマ連携 |
+| `dot_config/helix/config.toml` | HelixのNoctaliaテーマ連携 |
 
 ## OS別のセットアップ
 
@@ -75,6 +79,16 @@ chezmoiの適用時に `packageList.arch.txt` を参照し、`paru` で不足パ
 NixOS-WSL、nixpkgs、Noctalia、Zen Browserのバージョンは `flake.lock` で固定されます。
 NiriとNoctalia、Ghostty、Zen Browser、基本的なGUIアプリ、デスクトップ用フォントは
 `nixos/wayland.nix` で管理します。
+
+NoctaliaのKanagawaテーマを配色の単一ソースとし、GTK 3/4、Ghostty、Helix、
+Qt、Starshipへ公式テンプレートで配色を反映します。GNOMEアプリのテーマ、アイコン、
+カーソルはそれぞれadw-gtk3、Papirus、Bibataへ統一されます。
+
+WSLg上ではディスプレイマネージャーを使わず、次のコマンドでデスクトップを起動します。
+
+```sh
+niri -- ghostty
+```
 
 ```sh
 cd "$(ghq list --full-path | grep '/mikan-919/dotfiles$')"
@@ -94,7 +108,6 @@ NixOSでは `paru` を使わず、パッケージはすべて `nixos/packages.ni
 - **neovim** - git commit 用エディタ
 - **git-delta** - git diff ビューア
 - **fzf** - 履歴検索・補完
-- **mise** - 開発ツールのバージョン管理
 - **sheldon** - zsh プラグインマネージャ
 - **zsh-defer** - プラグインの遅延読み込み
 
