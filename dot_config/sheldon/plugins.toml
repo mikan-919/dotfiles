@@ -11,14 +11,20 @@ inline = '''
 autoload -Uz compinit
 
 # compaudit is relatively expensive. Check it once a day, while continuing to
-# load the existing completion dump on every shell startup.
-zcompdump_old=("${ZDOTDIR:-$HOME}"/.zcompdump(N.mh+24))
-if (( $#zcompdump_old )); then
-  compinit
-else
-  compinit -C
-fi
-unset zcompdump_old
+# load the existing completion dump on every shell startup. The dump is also
+# zcompiled, which roughly halves the time spent reading it back.
+() {
+  local dump=${ZDOTDIR:-$HOME}/.zcompdump
+  # Glob qualifiers do not expand inside [[ ]], so test staleness via an array.
+  # Use the plain qualifier form: (#q...) would require extended_glob.
+  local -a stale=( $dump(N.mh+24) )
+  if (( $#stale )); then
+    compinit -d $dump
+  else
+    compinit -C -d $dump
+  fi
+  [[ -f $dump.zwc && $dump.zwc -nt $dump ]] || zcompile -R -- $dump
+}
 '''
 
 [plugins.config-sync]
@@ -29,14 +35,49 @@ local = "~/.config/zsh/async"
 apply = ["defer"]
 
 [plugins.starship]
-inline = 'eval "$(starship init zsh)"'
+inline = '''
+# `starship init zsh` spawns starship once, and the PROMPT2 line inside its
+# output spawns it a second time. Neither depends on anything but the binary
+# and starship.toml, so cache the whole thing with PROMPT2 already resolved.
+() {
+  local cache=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/starship.zsh
+  local conf=${STARSHIP_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/starship.toml}
+  # Resolve the binary with the :c modifier rather than $commands[...]; touching
+  # that array hashes every executable on PATH, which costs ~40ms here.
+  local bin=${${:-starship}:c}
+  if [[ ! -f $cache || $bin -nt $cache || $conf -nt $cache ]]; then
+    mkdir -p $cache:h
+    {
+      starship init zsh | grep -v '^PROMPT2='
+      printf 'PROMPT2=%q\n' "$(starship prompt --continuation)"
+    } >| $cache
+    zcompile -R -- $cache
+  fi
+  source $cache
+}
+'''
 
-[plugins.fzf-scripts]
+# Ctrl-R / Ctrl-T stay synchronous so they work on the very first prompt.
+[plugins.fzf-key-bindings]
 github = "junegunn/fzf"
-use = ["shell/key-bindings.zsh", "shell/completion.zsh"]
+use = ["shell/key-bindings.zsh"]
+
+# The `**<TAB>` trigger is only needed once completion is actually used.
+[plugins.fzf-completion]
+github = "junegunn/fzf"
+use = ["shell/completion.zsh"]
+apply = ["defer"]
 
 [plugins.fzf-tab]
 github = "Aloxaf/fzf-tab"
+apply = ["defer"]
+
+[plugins.mise]
+inline = '''
+# mise's initial environment scan is expensive and isn't needed to draw the
+# first prompt. Run it as soon as ZLE becomes idle.
+zsh-defer -c 'eval "$(mise activate zsh)"'
+'''
 
 [plugins.zsh-autosuggestions]
 github = "zsh-users/zsh-autosuggestions"

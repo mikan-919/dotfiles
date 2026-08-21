@@ -1,1 +1,13 @@
-eval "$(sheldon source)"
+# `sheldon source` shells out on every startup just to re-render a static
+# script. Cache its output and only regenerate when the config or lock moves.
+() {
+  local cache=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sheldon.zsh
+  local conf=${XDG_CONFIG_HOME:-$HOME/.config}/sheldon/plugins.toml
+  local lock=${XDG_DATA_HOME:-$HOME/.local/share}/sheldon/plugins.lock
+  if [[ ! -f $cache || $conf -nt $cache || $lock -nt $cache ]]; then
+    mkdir -p $cache:h
+    sheldon source >| $cache
+    zcompile -R -- $cache
+  fi
+  source $cache
+}

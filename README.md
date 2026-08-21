@@ -46,7 +46,7 @@ git -C "$(ghq list --full-path | grep '/mikan-919/dotfiles$')" push
 
 | ファイル | 説明 |
 |---|---|
-| `dot_zshrc` | zsh 設定 (sheldon を呼ぶだけ) |
+| `dot_zshrc` | zsh 設定 (`sheldon source` の出力をキャッシュして読む) |
 | `dot_zshenv` | 環境変数 (EDITOR=helix) |
 | `dot_gitconfig.tmpl` | git 設定 (delta, gh 認証) |
 | `dot_config/starship.toml` | プロンプト設定 |
@@ -117,3 +117,33 @@ chezmoiのsource directoryは `~/ghq/github.com/mikan-919/dotfiles` に設定さ
 通常のgit操作で管理でき、`chezmoi apply` で各ファイルがホームディレクトリに展開される。
 
 テンプレートファイル（`.tmpl`）は chezmoi が解釈してから配置するため、マシンごとに値が変わる設定にも対応している。
+
+## zsh の起動時間
+
+`~/.cache/zsh/` に生成物をキャッシュすることで、対話シェルの起動を約 32ms から
+約 11ms に短縮しています。キャッシュは元ファイルの mtime で自動的に無効化される
+ため、通常は手動操作は不要です。
+
+| キャッシュ | 内容 | 再生成の条件 |
+|---|---|---|
+| `sheldon.zsh` | `sheldon source` の出力 | `plugins.toml` / `plugins.lock` の更新 |
+| `starship.zsh` | `starship init zsh` の出力 (`PROMPT2` を解決済み) | starship 本体 / `starship.toml` の更新 |
+| `~/.zcompdump.zwc` | 補完ダンプの zcompile 結果 | ダンプの再生成時 |
+
+いずれも `zcompile` 済みなので、読み込みは `.zwc` 経由になります。おかしくなったら
+`rm -rf ~/.cache/zsh ~/.zcompdump*` で作り直せます。
+
+計測は次のコマンドで行えます。
+
+```sh
+zsh -f -c 'zmodload zsh/datetime
+s=$EPOCHREALTIME; for i in {1..30}; do zsh -i -c exit; done
+printf "%.2f ms/run\n" $(( ($EPOCHREALTIME-s)/30*1000 ))'
+```
+
+### 注意点
+
+- `$commands[foo]` は PATH 上の全実行ファイルをハッシュするため、この環境では
+  約 40ms かかります。存在確認は `whence -p` か `${${:-foo}:c}` を使ってください。
+- グロブ修飾子は `[[ ]]` の中では展開されません。ファイルの新しさを見るときは
+  配列代入 (`local -a stale=( $dump(N.mh+24) )`) を使ってください。
