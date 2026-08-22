@@ -6,6 +6,37 @@ defer = "{{ hooks?.pre | nl }}{% for file in files %}zsh-defer source \"{{ file 
 [plugins.zsh-defer]
 github = "romkatv/zsh-defer"
 
+[plugins.cache]
+inline = '''
+zmodload -F zsh/stat b:zstat
+
+# Several tools below are initialised by evaluating a script they print, which
+# costs a subprocess per shell. The output only changes when the tool or its
+# config does, so it is cached on disk and this decides when to rebuild.
+#
+# Nix stamps every store file with mtime 1, so the usual `$binary -nt $cache`
+# test never fires here. What nixos-rebuild actually re-points is the
+# /run/current-system symlink, so its own mtime -- read without following it --
+# is the honest key on NixOS. Elsewhere the binaries' own mtimes work fine.
+zsh-cache-stale() {
+  local cache=$1; shift
+  [[ -f $cache ]] || return 0
+  local -a c s
+  zstat -A c +mtime -- $cache 2>/dev/null || return 0
+  if [[ -L /run/current-system ]] && zstat -L -A s +mtime -- /run/current-system 2>/dev/null; then
+    (( s[1] > c[1] )) && return 0
+  fi
+  # The generator for every derived cache is an inline block in plugins.toml,
+  # which sheldon re-renders into this file. Editing that config has to
+  # invalidate what it produces, so treat it as an input to all of them.
+  local f
+  for f in ${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sheldon.zsh $@; do
+    zstat -A s +mtime -- $f 2>/dev/null && (( s[1] > c[1] )) && return 0
+  done
+  return 1
+}
+'''
+
 [plugins.compinit]
 inline = '''
 autoload -Uz compinit
@@ -44,8 +75,7 @@ inline = '''
   local conf=${STARSHIP_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/starship.toml}
   # Resolve the binary with the :c modifier rather than $commands[...]; touching
   # that array hashes every executable on PATH, which costs ~40ms here.
-  local bin=${${:-starship}:c}
-  if [[ ! -f $cache || $bin -nt $cache || $conf -nt $cache ]]; then
+  if zsh-cache-stale $cache ${${:-starship}:c} $conf; then
     mkdir -p $cache:h
     {
       starship init zsh | grep -v '^PROMPT2='
@@ -61,6 +91,48 @@ inline = '''
 [plugins.fzf-key-bindings]
 github = "junegunn/fzf"
 use = ["shell/key-bindings.zsh"]
+
+# Loaded after fzf so atuin wins the contest for Ctrl-R. Cached for the same
+# reason starship is: each of these init scripts costs a subprocess to print.
+[plugins.tool-init]
+inline = '''
+# zoxide and direnv only define functions and hooks, so they are cheap enough
+# to keep on the critical path.
+() {
+  local cache=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/tools.zsh
+  if zsh-cache-stale $cache ${${:-zoxide}:c} ${${:-direnv}:c}; then
+    mkdir -p $cache:h
+    {
+      whence -p zoxide >/dev/null && zoxide init zsh
+      whence -p direnv >/dev/null && direnv hook zsh
+    } >| $cache
+    zcompile -R -- $cache
+  fi
+  source $cache
+}
+
+# atuin is a different story: its init mints a session id by shelling out to
+# `atuin uuid`, which costs ~14ms here -- more than the whole rest of startup.
+# Caching cannot help, because every shell needs its own id. Nothing reads the
+# session until the first command is recorded, so defer the lot. Running at ZLE
+# idle also puts it after fzf's key bindings, which is what lets it win Ctrl-R.
+() {
+  local cache=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/atuin.zsh
+  whence -p atuin >/dev/null || return
+  if zsh-cache-stale $cache ${${:-atuin}:c}; then
+    mkdir -p $cache:h
+    {
+      # Up-arrow stays plain zsh history; atuin only takes over Ctrl-R.
+      atuin init zsh --disable-up-arrow
+      # atuin also binds `?` on an empty line to its hosted AI assistant.
+      # There is no flag for that, so hand the key back to self-insert.
+      print -r -- "bindkey '?' self-insert"
+    } >| $cache
+    zcompile -R -- $cache
+  fi
+  zsh-defer source $cache
+}
+'''
 
 # The `**<TAB>` trigger is only needed once completion is actually used.
 [plugins.fzf-completion]

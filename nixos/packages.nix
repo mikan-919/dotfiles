@@ -9,6 +9,7 @@
 
   # Packages shared by the NixOS machines using these dotfiles.
   environment.systemPackages = with pkgs; [
+    atuin
     bat
     bottom
     bun
@@ -20,7 +21,9 @@
     curl
     delta
     erdtree
+    eza
     fastfetch
+    fd
     fzf
     gh
     ghq
@@ -41,10 +44,20 @@
     unzip
     uv
     wget
+    zoxide
     zsh
   ];
 
   programs.zsh.enable = true;
+
+  # Pulls in direnv itself plus nix-direnv, whose `use flake` keeps the
+  # evaluated devShell out of the GC roots' way and off the critical path.
+  programs.direnv = {
+    enable = true;
+    # The module would hook direnv from /etc/zshrc, which the user config skips
+    # via `setopt no_global_rcs`. The hook is installed from plugins.toml instead.
+    enableZshIntegration = false;
+  };
 
   i18n.supportedLocales = [
     "C.UTF-8/UTF-8"
