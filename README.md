@@ -129,7 +129,7 @@ NixOSでは `paru` を使わず、パッケージはすべて `nixos/packages.ni
 
 | ファイル | 内容 |
 |---|---|
-| `options.zsh` | シェルの基本挙動 (auto_cd、auto_pushd、extended_glob、no_clobber など) |
+| `options.zsh` | シェルの基本挙動 (auto_cd、auto_pushd、no_clobber など) |
 | `completion.zsh` | 補完の見た目と挙動 (`zstyle`)、fzf-tab のプレビュー定義 |
 | `keybindings.zsh` | emacs キーマップを土台にした編集キー |
 | `history.zsh` | 履歴の件数と重複の扱い |
@@ -237,3 +237,11 @@ hyperfine --warmup 10 --runs 50 'zsh -i -c exit' 'zsh -f -i -c exit'
 - ループで同じファイルを繰り返し `source` して計測すると、2 回目以降は関数定義済みの
   状態を測ることになり実態より速く出ます。初期化コストは毎回新しいシェルを起動して
   測ってください (atuin の実測値は 0.6ms と 15ms で食い違いました)。
+
+### extended_glob を入れていない理由
+
+`#` がパターン文字になり、NixOS で日常的に打つ `nix run nixpkgs#hello` や
+`nixos-rebuild switch --flake .#nixos` が壊れます。後者は `.#nixos` が
+「`.` の 0 回以上 + `nixos`」として `nixos/` にマッチし、フレーク参照が `nixos`
+だけになって `cannot find flake 'flake:nixos'` になります。
+必要な場面では関数の中で `setopt localoptions extended_glob` を立ててください。

@@ -18,11 +18,12 @@ unsetopt menu_complete       # TAB 一発で勝手に確定させない（fzf-ta
 unsetopt list_beep
 
 # --- グロブ -----------------------------------------------------------------
-setopt extended_glob         # ^ ~ # (#i) などの拡張パターンを有効化
 setopt numeric_glob_sort     # file2 < file10 の順で並べる
-# extended_glob は ^ をパターン文字にするため、`git show HEAD^` が
-# nomatch エラーになる。マッチしないパターンはそのまま渡す方が実用的。
-unsetopt nomatch
+# extended_glob は入れない。# がパターン文字になるため、NixOS で日常的に打つ
+# `nix run nixpkgs#hello` や `nixos-rebuild switch --flake .#nixos` が壊れる。
+# 後者は `.#nixos` が「. の 0 回以上 + nixos」として nixos/ にマッチしてしまい、
+# フレーク参照が nixos だけになって「flake:nixos が見つからない」になる。
+# 必要な場面では `setopt localoptions extended_glob` を関数内で立てること。
 
 # --- 入出力 -----------------------------------------------------------------
 setopt interactive_comments  # 対話行でも # 以降をコメント扱いにする
