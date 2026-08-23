@@ -37,6 +37,13 @@ zsh-cache-stale() {
 }
 '''
 
+# Extra completion functions for tools that ship none. fpath has to be complete
+# before compinit runs, so this stays ahead of it and off the defer path.
+[plugins.zsh-completions]
+github = "zsh-users/zsh-completions"
+dir = "src"
+apply = ["fpath"]
+
 [plugins.compinit]
 inline = '''
 autoload -Uz compinit
@@ -46,15 +53,22 @@ autoload -Uz compinit
 # zcompiled, which roughly halves the time spent reading it back.
 () {
   local dump=${ZDOTDIR:-$HOME}/.zcompdump
-  # Glob qualifiers do not expand inside [[ ]], so test staleness via an array.
+  # The dump itself is a poor stamp: compinit leaves the file untouched when
+  # its contents have not changed, so its mtime can sit behind the inputs
+  # below forever and every shell would take the slow path. The .zwc is
+  # rewritten unconditionally after each full run, so key the decision on it.
+  # Glob qualifiers do not expand inside [[ ]], so test freshness via an array.
   # Use the plain qualifier form: (#q...) would require extended_glob.
-  local -a stale=( $dump(N.mh+24) )
-  if (( $#stale )); then
-    compinit -d $dump
-  else
+  local -a fresh=( $dump.zwc(N.mh-24) )
+  # fpath is decided by the plugin set, so a re-rendered sheldon.zsh -- or a
+  # new system generation, which is what brings new completion files -- has to
+  # rebuild the dump as surely as the daily compaudit does.
+  if (( $#fresh )) && ! zsh-cache-stale $dump.zwc; then
     compinit -C -d $dump
+  else
+    compinit -d $dump
+    zcompile -R -- $dump
   fi
-  [[ -f $dump.zwc && $dump.zwc -nt $dump ]] || zcompile -R -- $dump
 }
 '''
 
@@ -100,11 +114,14 @@ inline = '''
 # to keep on the critical path.
 () {
   local cache=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/tools.zsh
-  if zsh-cache-stale $cache ${${:-zoxide}:c} ${${:-direnv}:c}; then
+  if zsh-cache-stale $cache ${${:-zoxide}:c} ${${:-direnv}:c} ${${:-dircolors}:c}; then
     mkdir -p $cache:h
     {
       whence -p zoxide >/dev/null && zoxide init zsh
       whence -p direnv >/dev/null && direnv hook zsh
+      # LS_COLORS は ls だけでなく、補完候補の色分け（completion.zsh の
+      # list-colors）と eza の既定配色にも使われる。
+      whence -p dircolors >/dev/null && dircolors -b
     } >| $cache
     zcompile -R -- $cache
   fi
@@ -147,15 +164,20 @@ apply = ["defer"]
 [plugins.mise]
 inline = '''
 # mise's initial environment scan is expensive and isn't needed to draw the
-# first prompt. Run it as soon as ZLE becomes idle.
-zsh-defer -c 'eval "$(mise activate zsh)"'
+# first prompt. Run it as soon as ZLE becomes idle. The `whence -p` guard goes
+# inside the deferred command on purpose: looking up a command that is not on
+# PATH walks every directory in it, which costs more than everything else in
+# this file put together.
+zsh-defer -c 'whence -p mise >/dev/null && eval "$(mise activate zsh)"'
 '''
+
+# Syntax highlighting wraps ZLE widgets, so it goes first: autosuggestions runs
+# with ZSH_AUTOSUGGEST_MANUAL_REBIND and only binds its widgets once, at load.
+[plugins.zsh-syntax-highlighting]
+github = "zsh-users/zsh-syntax-highlighting"
+apply = ["defer"]
 
 [plugins.zsh-autosuggestions]
 github = "zsh-users/zsh-autosuggestions"
 use = ["{{ name }}.zsh"]
-apply = ["defer"]
-
-[plugins.zsh-syntax-highlighting]
-github = "zsh-users/zsh-syntax-highlighting"
 apply = ["defer"]

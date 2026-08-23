@@ -61,3 +61,31 @@ if whence -p eza >/dev/null; then
   alias la='eza -la --git --group-directories-first'
   alias lt='eza --tree --level=2 --group-directories-first'
 fi
+
+# --- 移動 -------------------------------------------------------------------
+# auto_cd と auto_pushd により、`..` や `-` はそのまま cd として働く。
+# d でスタック、数字でその位置へ飛べる。
+alias d='dirs -v'
+for i in {1..9}; do alias "$i=cd +$i"; done
+unset i
+
+# 作って入る。
+mkcd() { mkdir -p -- "$1" && cd -- "$1" }
+
+# --- 検索・表示 -------------------------------------------------------------
+if whence -p rg >/dev/null; then
+  # 小文字だけの入力は大小無視、隠しファイルも見る（.git は除く）。
+  alias rg='rg --smart-case --hidden --glob "!.git"'
+fi
+alias grep='grep --color=auto'
+alias df='df -h'
+alias du='du -h'
+alias ip='ip -color=auto'
+
+# --- git --------------------------------------------------------------------
+alias g='git'
+alias gs='git status --short --branch'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gl='git log --oneline --graph --decorate -20'
+whence -p lazygit >/dev/null && alias lg='lazygit'

@@ -1,5 +1,74 @@
 { lib, pkgs, ... }:
 
+let
+  # Grouped only for readability; every group is concatenated below.
+  packages = with pkgs; {
+    shell = [
+      atuin
+      sheldon
+      starship
+      zoxide
+      zsh
+    ];
+
+    cli = [
+      bat
+      bottom
+      coreutils # dircolors, seeding LS_COLORS for completion listings
+      curl
+      erdtree
+      eza
+      fastfetch
+      fd
+      fzf
+      herdr
+      hyperfine
+      jq
+      ripgrep
+      tealdeer
+      unzip
+      util-linux # col(1), used by the bat-backed MANPAGER
+      wget
+    ];
+
+    git = [
+      delta
+      gh
+      ghq
+      git
+      lazygit
+    ];
+
+    editor = [
+      helix
+      neovim
+    ];
+
+    dev = [
+      bun
+      clang
+      cmake
+      lld
+      mise
+      mold
+      ninja
+      nodejs
+      sccache
+      uv
+    ];
+
+    system = [
+      chezmoi
+      openssh
+    ];
+
+    ai = [
+      claude-code
+      codex
+      repomix
+    ];
+  };
+in
 {
   # Enable the modern Nix CLI used by `nix run`, `nix shell`, and flakes.
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -8,45 +77,7 @@
     builtins.elem (lib.getName pkg) [ "claude-code" ];
 
   # Packages shared by the NixOS machines using these dotfiles.
-  environment.systemPackages = with pkgs; [
-    atuin
-    bat
-    bottom
-    bun
-    chezmoi
-    clang
-    claude-code
-    cmake
-    codex
-    curl
-    delta
-    erdtree
-    eza
-    fastfetch
-    fd
-    fzf
-    gh
-    ghq
-    git
-    helix
-    herdr
-    hyperfine
-    jq
-    lld
-    mold
-    neovim
-    ninja
-    openssh
-    repomix
-    sccache
-    sheldon
-    starship
-    unzip
-    uv
-    wget
-    zoxide
-    zsh
-  ];
+  environment.systemPackages = lib.concatLists (lib.attrValues packages);
 
   programs.zsh.enable = true;
 

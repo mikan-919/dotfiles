@@ -1,4 +1,6 @@
-export EDITOR=helix
+# NixOS が入れる helix の実行ファイル名は hx。helix という名前のバイナリは無い。
+export EDITOR=hx
+export VISUAL=$EDITOR
 
 # The NixOS-generated /etc/zshrc duplicates completion and prompt setup from
 # the user configuration. /etc/zshenv is still loaded, so Nix paths and fpath
