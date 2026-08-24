@@ -3,3 +3,4 @@ nixos/
 flake.nix
 flake.lock
 README.md
+bootstrap.sh
