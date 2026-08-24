@@ -57,8 +57,10 @@ git -C "$(ghq list --full-path | grep '/mikan-919/dotfiles$')" push
 | `packageList.arch.txt` | Arch Linux用パッケージ一覧 |
 | `run_onchange_installPackages.sh.tmpl` | Archでのみ不足パッケージを自動インストール |
 | `flake.nix` / `flake.lock` | NixOSと外部入力の宣言・バージョン固定 |
-| `nixos/configuration.nix` | NixOS-WSLのホスト設定 |
+| `nixos/configuration.nix` | NixOS-WSLのホスト設定と home-manager の組み込み |
+| `nixos/nix.nix` | Nix デーモンの設定、世代の掃除、command-not-found、nix-ld |
 | `nixos/packages.nix` | 共通CLIパッケージとシェル設定 |
+| `nixos/home.nix` | home-manager が持つユーザー領域（パッケージ、XDG の既定アプリ） |
 | `nixos/wayland.nix` | Niri、Noctalia、GUIアプリ、Wayland基盤、デスクトップ用フォント |
 | `dot_config/niri/config.kdl` | Niriの起動項目、外観、キーバインド |
 | `dot_config/noctalia/config.toml` | デスクトップ全体の配色源とテーマ配布設定 |
@@ -117,6 +119,10 @@ NixOSでは `paru` を使わず、パッケージはすべて `nixos/packages.ni
 - **bat** - cat の置き換え。`MANPAGER` と fzf/fzf-tab のファイルプレビューを兼ねる
 - **lazygit** - git の TUI (`lg`)
 - **tealdeer** - `tldr` によるコマンド例の逆引き
+- **nh** - `nixos-rebuild` のラッパー。世代の差分を出し、掃除も持つ
+- **nix-index / comma** - 未導入コマンドの逆引きと、入れずに一回だけ実行する `,`
+- **nix-ld** - NixOS 以外向けのプリビルドバイナリを動かすローダ
+- **fcitx5-mozc** - 日本語入力
 - **sheldon** - zsh プラグインマネージャ
 - **zsh-defer** - プラグインの遅延読み込み
 - **fzf-tab** - タブ補完を fzf に置き換える。候補のプレビュー付き
@@ -163,6 +169,73 @@ NixOSでは `paru` を使わず、パッケージはすべて `nixos/packages.ni
 
 `auto_cd` と `auto_pushd` により、`..` や `-` はそのまま `cd` として働きます。
 `d` で移動履歴の一覧、`1`〜`9` でその位置へ飛べます。`z` (zoxide) は使用頻度順です。
+
+## Nix の運用
+
+### 世代の掃除とストアの最適化
+
+掃除は `nh` に一本化しています。`nix.gc.automatic` と同時に有効にすると nh 側の
+assertion で rebuild ごと止まるため、そちらは使いません。
+
+| 何を | いつ | 残すもの |
+|---|---|---|
+| 世代の掃除 (`programs.nh.clean`) | 週次 | 直近 5 世代、または 30 日以内の世代 |
+| ハードリンク化 (`nix.optimise`) | 週次 | — |
+
+`auto-optimise-store` ではなく `nix.optimise` を使っているのは、前者がストアへの
+書き込みのたびにハッシュを取るためです。週に一度まとめてやる方がビルドは速い。
+
+`keep-outputs` と `keep-derivations` を立ててあるので、direnv が張った devShell は
+掃除で消えません。これが無いと、掃除のたびに開発環境の作り直しになります。
+
+### rebuild
+
+```sh
+nh os switch          # nixos-rebuild switch 相当。差分を nvd で表示する
+nh os boot            # 次回起動から適用
+nh os switch --dry    # 何が変わるかだけ見る
+```
+
+`programs.nh.flake` にこのリポジトリのパスを書いてあるので、どこから打っても
+同じ設定を指します。素の `sudo nixos-rebuild switch --flake .#nixos` も使えます。
+
+### 未導入コマンドの逆引き
+
+標準の `programs.command-not-found` はチャンネル同梱のデータベースを読むため
+flake 運用では動きません。nix-index-database の配布物に差し替えてあります。
+
+```
+$ cowsay
+cowsay: command not found
+
+以下のパッケージが cowsay を提供しています:
+  nix profile install nixpkgs#cowsay
+
+一度だけ実行するなら:
+  , cowsay
+```
+
+ハンドラの実体は `/etc/zsh/command-not-found.zsh` です。`/etc/zshrc` は
+`no_global_rcs` で読み飛ばしているため、NixOS モジュールの shell 統合は切って、
+安定したパスに置き直したものを `async/command_not_found.zsh` が読んでいます。
+
+## chezmoi と home-manager の線引き
+
+両方を使っていますが、持ち場は重ねません。
+
+| | 持つもの | 持たないもの |
+|---|---|---|
+| chezmoi | 手で書いて頻繁に触る設定ファイル（zsh, sheldon, starship, niri, ghostty, helix, git） | パッケージ |
+| home-manager | ユーザー単位のパッケージ、user サービス、XDG の既定アプリ | dotfile |
+
+home-manager 側で `programs.zsh` のような「`~/.zshrc` を生成する」モジュールは
+**有効にしません**。chezmoi の生成物と衝突するうえ、`~/.cache/zsh` のキャッシュを
+前提にした起動時間の作り込みも壊れます。同じ理由で `home.sessionVariables` も
+使いません（それを読ませる shell 統合を入れていないので、書いても効きません）。
+環境変数は `sync/exports.zsh` に置きます。
+
+衝突したときに rebuild を止めないよう、`backupFileExtension = "hm-bak"` を
+設定してあります。`*.hm-bak` が生えていたら、それは境界を踏んだ合図です。
 
 ## 仕組み
 

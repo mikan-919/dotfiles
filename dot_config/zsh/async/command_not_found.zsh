@@ -1,8 +1,7 @@
-# Preserve NixOS package suggestions without loading the rest of /etc/zshrc.
-# Probe with `whence -p` instead of $+commands[...]: the latter hashes every
-# executable on PATH (~40ms with the Nix profiles in play).
-if [[ -n ${NIX_PROFILES:-} ]] && whence -p command-not-found >/dev/null; then
-  command_not_found_handler() {
-    command command-not-found "$@"
-  }
-fi
+# 未導入のコマンドを打ったとき、それが入っている nixpkgs のパッケージを教える。
+# 実体は nix-index が配る command-not-found スクリプトで、nixos/nix.nix が
+# 安定したパスに置き直している（/etc/zshrc は no_global_rcs で読まないため）。
+#
+# 存在確認はファイルの有無で行う。`whence -p` は見つからないコマンドを探すと
+# PATH 上のディレクトリを全部歩くので、ここでは使わない。
+[[ -r /etc/zsh/command-not-found.zsh ]] && source /etc/zsh/command-not-found.zsh

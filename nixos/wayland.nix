@@ -54,6 +54,24 @@ in
 
   programs.dconf.enable = true;
 
+  # 日本語入力。waylandFrontend を立てると GTK_IM_MODULE / QT_IM_MODULE を
+  # あえて設定せず、Wayland の text-input プロトコルでアプリに渡す。Niri も
+  # Ghostty も Zen も対応しているのでこちらが素直で、XWayland のアプリ向けには
+  # モジュールが XMODIFIERS=@im=fcitx を立ててくれる。
+  #
+  # このモジュールは fcitx5 を起動する user サービスを作らない。Niri を
+  # `niri --session` ではなく素で起動していて graphical-session.target が
+  # 立たないこともあり、起動は niri の spawn-at-startup に任せてある
+  # (dot_config/niri/config.kdl)。
+  i18n.inputMethod = {
+    enable = true;
+    type = "fcitx5";
+    fcitx5 = {
+      addons = [ pkgs.fcitx5-mozc ];
+      waylandFrontend = true;
+    };
+  };
+
   # Establish the same appearance defaults GNOME applications expect. Noctalia's
   # GTK templates update the color-scheme value when its light/dark mode changes.
   systemd.user.services.desktop-theme = {

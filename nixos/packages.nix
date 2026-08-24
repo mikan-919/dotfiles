@@ -61,18 +61,10 @@ let
       chezmoi
       openssh
     ];
-
-    ai = [
-      claude-code
-      codex
-      repomix
-    ];
   };
 in
 {
-  # Enable the modern Nix CLI used by `nix run`, `nix shell`, and flakes.
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
+  # Nix デーモンとツールまわりの設定は nixos/nix.nix にある。
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [ "claude-code" ];
 
