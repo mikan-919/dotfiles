@@ -4,6 +4,25 @@
 
 ## 初回セットアップ
 
+### NixOS-WSL — ワンライナー
+
+まっさらな NixOS-WSL（flake もまだ有効になっていない状態）から、この一行で
+リポジトリの取得、システムの切り替え、dotfiles の展開まで終わります。
+
+```sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/mikan-919/dotfiles/main/bootstrap.sh)"
+```
+
+`curl … | bash` ではなくこの形なのは、標準入力を端末に残すためです。パイプにすると
+`sudo` がパスワードを読めずそこで止まります。
+
+スクリプトの実体は [`bootstrap.sh`](bootstrap.sh)。git も chezmoi も入っていない
+前提で、必要なものは nixpkgs からその場限りで借ります。置き場所は `ghq root` に
+従い、WSL 以外や `nixos` 以外のユーザーで走らせようとしたときは理由を示して止まります。
+何度走らせても構いません（2 回目以降は取得の代わりに更新します）。
+
+### その他の OS（手作業）
+
 ```sh
 # 1. リポジトリを clone（ghqを使う場合）
 ghq get git@github.com:mikan-919/dotfiles.git
@@ -52,6 +71,7 @@ git -C "$(ghq list --full-path | grep '/mikan-919/dotfiles$')" push
 | `dot_config/starship.toml` | プロンプト設定 |
 | `dot_config/sheldon/plugins.toml` | zsh プラグイン管理 |
 | `.chezmoi.toml.tmpl` | chezmoi自身の初期設定 |
+| `bootstrap.sh` | まっさらな NixOS-WSL を一行で立ち上げるスクリプト |
 | `dot_config/zsh/sync/` | 即時読み込みする zsh 設定 (options / completion / keybindings / history / exports / suggestions) |
 | `dot_config/zsh/async/` | `zsh-defer` で遅延読み込みする zsh 設定 (alias / command-not-found) |
 | `packageList.arch.txt` | Arch Linux用パッケージ一覧 |
@@ -75,6 +95,9 @@ chezmoiの適用時に `packageList.arch.txt` を参照し、`paru` で不足パ
 インストールします。この処理はArch Linux以外では生成も実行もされません。
 
 ### NixOS
+
+新しい機械なら、上の[ワンライナー](#nixos-wsl--ワンライナー)がこの節の内容を
+まとめて実行します。以下は手作業で行う場合の手順です。
 
 このリポジトリのflakeからNixOS設定を反映します。
 
