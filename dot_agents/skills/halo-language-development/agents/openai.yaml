@@ -1,0 +1,4 @@
+interface:
+  display_name: "Halo Language Development"
+  short_description: "Evolve Halo through safe vertical compiler slices"
+  default_prompt: "Use $halo-language-development to implement the next coherent Halo compiler slice."
