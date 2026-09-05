@@ -1,6 +1,9 @@
-{ lib, pkgs, ... }:
+{ inputs, lib, pkgs, ... }:
 
 let
+  # nixpkgs の `vp` は別ソフトなので、Vite+ の CLI は専用 flake から取得する。
+  vitePlus = inputs.nix-vite-plus.packages.${pkgs.system}.vp;
+
   # Grouped only for readability; every group is concatenated below.
   packages = with pkgs; {
     shell = [
@@ -55,6 +58,7 @@ let
       nodejs
       sccache
       uv
+      vitePlus
     ];
 
     system = [

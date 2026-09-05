@@ -146,6 +146,7 @@ NixOSでは `paru` を使わず、パッケージはすべて `nixos/packages.ni
 - **nix-index / comma** - 未導入コマンドの逆引きと、入れずに一回だけ実行する `,`
 - **nix-ld** - NixOS 以外向けのプリビルドバイナリを動かすローダ
 - **fcitx5-mozc** - 日本語入力
+- **Vite+** - Web開発の統合ツールチェーン (`vp`)
 - **sheldon** - zsh プラグインマネージャ
 - **zsh-defer** - プラグインの遅延読み込み
 - **fzf-tab** - タブ補完を fzf に置き換える。候補のプレビュー付き
