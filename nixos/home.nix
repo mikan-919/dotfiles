@@ -1,6 +1,8 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 
 let
+  llmAgents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+
   # nixpkgs の `fx` は同名の JSON ビューアーなので、コーディングエージェントは
   # 公式の Linux バイナリを別名でパッケージ化する。
   fxAgent = pkgs.stdenvNoCC.mkDerivation rec {
@@ -53,7 +55,7 @@ in
   # システム全体ではなく自分だけが使うもの。更新が速く、root には要らない。
   home.packages = with pkgs; [
     claude-code
-    codex
+    llmAgents.codex
     fxAgent
     repomix
   ];

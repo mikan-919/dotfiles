@@ -1,4 +1,4 @@
-{ ... }:
+{ inputs, ... }:
 
 {
   imports = [
@@ -23,6 +23,9 @@
     # システム側で評価した pkgs をそのまま使う。ユーザー用に nixpkgs を
     # もう一度評価しないので、rebuild が余分に遅くならない。
     useGlobalPkgs = true;
+    # NixOS の specialArgs は home-manager のユーザー設定には渡らないため、
+    # flake input から Codex を取得するために明示的に渡す。
+    extraSpecialArgs = { inherit inputs; };
     # パッケージを /etc/profiles/per-user/nixos に置く。ここは既に PATH に
     # 入っているので、シェル側の設定は要らない。
     useUserPackages = true;

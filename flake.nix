@@ -24,6 +24,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Codex のパッケージを取得する。llm-agents.nix が固定する nixpkgs-unstable
+    # とビルド済み成果物の組み合わせを使うため、follows は指定しない。
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+    };
+
     nix-vite-plus = {
       url = "github:ryoppippi/nix-vite-plus";
       inputs.nixpkgs.follows = "nixpkgs";
