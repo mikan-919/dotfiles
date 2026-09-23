@@ -55,7 +55,7 @@ in
   # システム全体ではなく自分だけが使うもの。更新が速く、root には要らない。
   home.packages = with pkgs; [
     claude-code
-    llmAgents.codex
+    codex
     fxAgent
     repomix
   ];
