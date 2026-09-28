@@ -60,6 +60,7 @@ let
       sccache
       uv
       vitePlus
+      glib
     ];
 
     system = [
