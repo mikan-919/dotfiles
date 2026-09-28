@@ -61,6 +61,8 @@ let
       uv
       vitePlus
       glib
+      glib.dev
+      pkg-config
     ];
 
     system = [
@@ -76,6 +78,7 @@ in
 
   # Packages shared by the NixOS machines using these dotfiles.
   environment.systemPackages = lib.concatLists (lib.attrValues packages);
+  environment.variables.PKG_CONFIG_PATH = "/run/current-system/sw/lib/pkgconfig";
 
   programs.zsh.enable = true;
 
