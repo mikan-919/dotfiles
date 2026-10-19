@@ -39,7 +39,6 @@ let
       gh
       ghq
       git
-      jujutsu
       lazygit
     ];
 
