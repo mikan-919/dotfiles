@@ -1,92 +1,83 @@
-{ inputs, lib, pkgs, ... }:
+{
+  inputs,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   # nixpkgs の `vp` は別ソフトなので、Vite+ の CLI は専用 flake から取得する。
-  vitePlus = inputs.nix-vite-plus.packages.${pkgs.system}.vp;
-
-  # Grouped only for readability; every group is concatenated below.
-  packages = with pkgs; {
-    shell = [
-      atuin
-      sheldon
-      starship
-      zoxide
-      zsh
-    ];
-
-    cli = [
-      bat
-      bottom
-      coreutils # dircolors, seeding LS_COLORS for completion listings
-      curl
-      erdtree
-      eza
-      fastfetch
-      fd
-      fzf
-      herdr
-      hyperfine
-      jq
-      ripgrep
-      tealdeer
-      unzip
-      util-linux # col(1), used by the bat-backed MANPAGER
-      wget
-    ];
-
-    git = [
-      delta
-      gh
-      ghq
-      git
-      lazygit
-    ];
-
-    editor = [
-      helix
-      neovim
-    ];
-
-    dev = [
-      bun
-      clang
-      cmake
-      lld
-      mise
-      mold
-      ninja
-      nodejs
-      sccache
-      uv
-      vitePlus
-      glib
-      glib.dev
-      pkg-config
-    ];
-
-    system = [
-      chezmoi
-      openssh
-    ];
-  };
+  vitePlus = inputs.nix-vite-plus.packages.${pkgs.stdenv.hostPlatform.system}.vp;
 in
 {
-  # Nix デーモンとツールまわりの設定は nixos/nix.nix にある。
-  nixpkgs.config.allowUnfreePredicate = pkg:
-    builtins.elem (lib.getName pkg) [ "claude-code" ];
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "claude-code" ];
 
-  # Packages shared by the NixOS machines using these dotfiles.
-  environment.systemPackages = lib.concatLists (lib.attrValues packages);
+  environment.systemPackages = with pkgs; [
+    # コマンド操作
+    bat
+    bottom
+    coreutils # dircolors で補完候補の色を設定する
+    curl
+    erdtree
+    eza
+    fastfetch
+    fd
+    fzf
+    herdr
+    hyperfine
+    jq
+    ripgrep
+    tealdeer
+    unzip
+    util-linux # bat を使う MANPAGER 用の col
+    wget
+
+    # 開発
+    bun
+    clang
+    cmake
+    lld
+    mise
+    mold
+    ninja
+    nodejs
+    sccache
+    uv
+    vitePlus
+    glib
+    glib.dev
+    pkg-config
+
+    # エディター
+    helix
+    neovim
+
+    # Git
+    delta
+    gh
+    ghq
+    git
+    lazygit
+
+    # シェル
+    atuin
+    sheldon
+    starship
+    zoxide
+    zsh
+
+    # システム管理
+    chezmoi
+    openssh
+  ];
   environment.variables.PKG_CONFIG_PATH = "/run/current-system/sw/lib/pkgconfig";
 
   programs.zsh.enable = true;
 
-  # Pulls in direnv itself plus nix-direnv, whose `use flake` keeps the
-  # evaluated devShell out of the GC roots' way and off the critical path.
+  # direnv と nix-direnv でディレクトリごとの開発環境を読み込む。
   programs.direnv = {
     enable = true;
-    # The module would hook direnv from /etc/zshrc, which the user config skips
-    # via `setopt no_global_rcs`. The hook is installed from plugins.toml instead.
+    # /etc/zshrc を読まないため、フックは sheldon の plugins.toml から設定する。
     enableZshIntegration = false;
   };
 

@@ -2,16 +2,16 @@
 
 {
   nix.settings = {
-    experimental-features = [ "nix-command" "flakes" ];
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
 
-    # direnv が張った devShell を GC から守る。これが無いと掃除のたびに開発環境が
-    # 消え、次にそのディレクトリへ入ったときに作り直しになる。
+    # direnv の開発環境がストアの掃除で消えるのを防ぐ。
     keep-outputs = true;
     keep-derivations = true;
 
-    # wheel のユーザーにも信頼を与える。root だけだと、flake 側が指定した
-    # binary cache が黙って無視される。これらのリストは既定値を上書きせず
-    # 追記されるので、root や cache.nixos.org を書き足す必要はない。
+    # wheel グループによる外部バイナリキャッシュの利用を許可する。
     trusted-users = [ "@wheel" ];
 
     substituters = [ "https://nix-community.cachix.org" ];
@@ -19,20 +19,17 @@
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
     ];
 
-    # 編集中のリポジトリはたいてい dirty なので、そのたびの警告は要らない。
+    # 未コミットの変更に対する警告を抑制する。
     warn-dirty = false;
   };
 
-  # ストア内の同一ファイルをハードリンクにまとめる。auto-optimise-store と違って
-  # 書き込みのたびにハッシュを取らないので、日々のビルドは遅くならない。
+  # ストアの重複ファイルを週次でハードリンクにまとめる。
   nix.optimise = {
     automatic = true;
     dates = [ "weekly" ];
   };
 
-  # nixos-rebuild のラッパー。世代の差分を nvd で見せ、掃除も受け持つ。
-  # 掃除は nh に一本化する: nix.gc.automatic と同時に有効にすると、nh 側の
-  # assertion で rebuild そのものが止まる。
+  # nh で構成の反映と世代の掃除を行う。nix.gc.automatic は併用しない。
   programs.nh = {
     enable = true;
     flake = "/home/nixos/ghq/github.com/mikan-919/dotfiles";
@@ -44,29 +41,24 @@
     };
   };
 
-  # 標準の command-not-found はチャンネル同梱の DB を読むため、flake 運用では
-  # 動かない。実際、zsh 側にハンドラだけあって本体が無い状態だった。
+  # チャンネル用の検索を無効にし、flake 用の nix-index を使う。
   programs.command-not-found.enable = false;
 
   programs.nix-index = {
     enable = true;
-    # /etc/zshrc は no_global_rcs で読み飛ばしているので、ここから挿しても
-    # 届かない。ハンドラは下の /etc のファイルをユーザーの zsh 設定が読む。
+    # zsh は /etc/zshrc を読まないため、下の検索スクリプトを設定側から読み込む。
     enableZshIntegration = false;
     enableBashIntegration = false;
   };
 
-  # `, cowsay` で入れずに一度だけ実行する。DB は nix-index-database の配布物を
-  # 使うので、自前で nix-index を 10 分回す必要はない。
+  # `, cowsay` のように、未導入のコマンドを一度だけ実行する。
   programs.nix-index-database.comma.enable = true;
 
-  # ユーザーの zsh から読めるよう、安定したパスに置き直す。
+  # zsh 設定から読み込む検索スクリプトを /etc に配置する。
   environment.etc."zsh/command-not-found.zsh".source =
     "${pkgs.nix-index}/etc/profile.d/command-not-found.sh";
 
-  # NixOS 以外向けにビルドされた実行ファイルを動かすためのローダ。bun / npm / uv
-  # が引いてくるプリビルドバイナリは、これが無いと ELF interpreter が見つからず
-  # 起動しない。足りないライブラリが出たらここに足す。
+  # bun、npm、uv などが取得する Linux バイナリ向けのローダーと共有ライブラリ。
   programs.nix-ld = {
     enable = true;
     libraries = with pkgs; [
@@ -80,6 +72,6 @@
     ];
   };
 
-  # 世代の差分表示。nh が内部で使うほか、単体でも打てる。
+  # nh と単独実行で使う世代の差分表示。
   environment.systemPackages = [ pkgs.nvd ];
 }

@@ -81,6 +81,7 @@ git -C "$(ghq list --full-path | grep '/mikan-919/dotfiles$')" push
 | `nixos/nix.nix` | Nix デーモンの設定、世代の掃除、command-not-found、nix-ld |
 | `nixos/packages.nix` | 共通CLIパッケージとシェル設定 |
 | `nixos/home.nix` | home-manager が持つユーザー領域（パッケージ、XDG の既定アプリ） |
+| `nixos/pkgs/fx.nix` | fx エージェントのパッケージ定義 |
 | `nixos/wayland.nix` | Niri、Noctalia、GUIアプリ、Wayland基盤、デスクトップ用フォント |
 | `dot_config/niri/config.kdl` | Niriの起動項目、外観、キーバインド |
 | `dot_config/noctalia/config.toml` | デスクトップ全体の配色源とテーマ配布設定 |
@@ -99,7 +100,7 @@ chezmoiの適用時に `packageList.arch.txt` を参照し、`paru` で不足パ
 新しい機械なら、上の[ワンライナー](#nixos-wsl--ワンライナー)がこの節の内容を
 まとめて実行します。以下は手作業で行う場合の手順です。
 
-このリポジトリのflakeからNixOS設定を反映します。
+このリポジトリのflakeからNixOS設定を反映します。Nixファイルは `nix fmt` で整形します（`flake.nix` で指定した整形ツールを使用）。
 
 NixOS-WSL、nixpkgs、Noctalia、Zen Browserのバージョンは `flake.lock` で固定されます。
 NiriとNoctalia、Ghostty、Zen Browser、基本的なGUIアプリ、デスクトップ用フォントは
