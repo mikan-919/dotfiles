@@ -4,6 +4,19 @@ let
   system = pkgs.stdenv.hostPlatform.system;
 in
 {
+  # Qt 6.12 の uic（画面定義の変換器）が先頭の :: を拒否するため、Mozc の定義を修正する。
+  # https://github.com/google/mozc/issues/1594
+  nixpkgs.overlays = [
+    (_final: prev: {
+      mozc = prev.mozc.overrideAttrs (old: {
+        postPatch = (old.postPatch or "") + ''
+          substituteInPlace src/gui/dictionary_tool/dictionary_tool.ui \
+            --replace-fail '::mozc::gui::DictionaryContentTableWidget' 'mozc::gui::DictionaryContentTableWidget'
+        '';
+      });
+    })
+  ];
+
   # WSLg 内で Niri を起動する。ログイン画面やデスクトップセッションは構成しない。
   environment.systemPackages = [
     pkgs.niri
