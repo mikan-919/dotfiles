@@ -4,6 +4,8 @@ model_reasoning_effort = "high"
 
 [mcp_servers.kaggle]
 url = "https://www.kaggle.com/mcp"
+# Kaggle の OAuth で識別子と戻り先が拒否されるため、保存した API トークンを使う。
+http_headers_helper = "jq -Rs '{Authorization: (\"Bearer \" + rtrimstr(\"\\n\"))}' ~/.kaggle/access_token"
 
 [projects."/mnt/c/Users/mikan/Downloads"]
 trust_level = "trusted"
