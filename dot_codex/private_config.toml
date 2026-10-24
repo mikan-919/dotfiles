@@ -1,6 +1,10 @@
 approvals_reviewer = "user"
 model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
+
+[mcp_servers.kaggle]
+url = "https://www.kaggle.com/mcp"
+
 [projects."/mnt/c/Users/mikan/Downloads"]
 trust_level = "trusted"
 
