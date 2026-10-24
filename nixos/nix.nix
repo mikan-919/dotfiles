@@ -14,9 +14,14 @@
     # wheel グループによる外部バイナリキャッシュの利用を許可する。
     trusted-users = [ "@wheel" ];
 
-    substituters = [ "https://nix-community.cachix.org" ];
+    substituters = [
+      "https://nix-community.cachix.org"
+      # llm-agents.nix のビルド済みパッケージを取得し、ローカルでのコンパイルを避ける。
+      "https://cache.numtide.com"
+    ];
     trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
     ];
 
     # 未コミットの変更に対する警告を抑制する。
