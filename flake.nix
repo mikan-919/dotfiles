@@ -9,26 +9,22 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # ユーザー領域のうち、dotfile ではない部分（パッケージ、user サービス、
-    # XDG の取り決め）を受け持つ。設定ファイルそのものは chezmoi のままで、
-    # 線引きは nixos/home.nix の先頭に書いてある。
+    # ユーザーのパッケージとサービスを管理する。設定ファイルは chezmoi で管理する。
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # command-not-found 用のビルド済みデータベース。自前で `nix-index` を回すと
-    # 10 分以上かかるうえ、その間ずっと当たらない。
+    # コマンド検索に使うデータベースを取得する。
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Codex のパッケージを取得する。llm-agents.nix が固定する nixpkgs-unstable
-    # とビルド済み成果物の組み合わせを使うため、follows は指定しない。
-    llm-agents = {
-      url = "github:numtide/llm-agents.nix";
-    };
+    # 配布元が固定する nixpkgs とビルド済み成果物を使うため、follows は指定しない。
+    llm-agents.url = "github:numtide/llm-agents.nix";
+
+    omp.url = "github:can1357/oh-my-pi";
 
     nix-vite-plus = {
       url = "github:ryoppippi/nix-vite-plus";
@@ -46,16 +42,26 @@
     };
   };
 
-  outputs = inputs@{ nixpkgs, nixos-wsl, home-manager, nix-index-database, ... }: {
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = { inherit inputs; };
-      modules = [
-        nixos-wsl.nixosModules.default
-        home-manager.nixosModules.home-manager
-        nix-index-database.nixosModules.nix-index
-        ./nixos/configuration.nix
-      ];
+  outputs =
+    inputs@{
+      nixpkgs,
+      nixos-wsl,
+      home-manager,
+      nix-index-database,
+      ...
+    }:
+    {
+      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt;
+
+      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = { inherit inputs; };
+        modules = [
+          nixos-wsl.nixosModules.default
+          home-manager.nixosModules.home-manager
+          nix-index-database.nixosModules.nix-index
+          ./nixos/configuration.nix
+        ];
+      };
     };
-  };
 }

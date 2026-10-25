@@ -4,14 +4,26 @@ let
   system = pkgs.stdenv.hostPlatform.system;
 in
 {
-  # Niri runs nested inside WSLg's Weston compositor. No display manager or
-  # full desktop session is needed for this setup.
+  # Qt 6.12 の uic（画面定義の変換器）が先頭の :: を拒否するため、Mozc の定義を修正する。
+  # https://github.com/google/mozc/issues/1594
+  nixpkgs.overlays = [
+    (_final: prev: {
+      mozc = prev.mozc.overrideAttrs (old: {
+        postPatch = (old.postPatch or "") + ''
+          substituteInPlace src/gui/dictionary_tool/dictionary_tool.ui \
+            --replace-fail '::mozc::gui::DictionaryContentTableWidget' 'mozc::gui::DictionaryContentTableWidget'
+        '';
+      });
+    })
+  ];
+
+  # WSLg 内で Niri を起動する。ログイン画面やデスクトップセッションは構成しない。
   environment.systemPackages = [
     pkgs.niri
     inputs.noctalia.packages.${system}.default
     inputs.zen-browser.packages.${system}.default
 
-    # Core desktop applications.
+    # デスクトップアプリ。
     pkgs.ghostty
     pkgs.nautilus
     pkgs.loupe
@@ -21,7 +33,7 @@ in
     pkgs.xdg-utils
     pkgs.xwayland-satellite
 
-    # Wayland desktop plumbing and everyday utilities.
+    # Wayland の基盤と操作用のツール。
     pkgs.adwaita-icon-theme
     pkgs.adw-gtk3
     pkgs.bibata-cursors
@@ -36,7 +48,7 @@ in
     pkgs.wtype
   ];
 
-  # File pickers, opening links, and screen sharing for Wayland applications.
+  # Wayland アプリのファイル選択、リンクの起動、画面共有を提供する。
   xdg.portal = {
     enable = true;
     xdgOpenUsePortal = true;
@@ -54,15 +66,8 @@ in
 
   programs.dconf.enable = true;
 
-  # 日本語入力。waylandFrontend を立てると GTK_IM_MODULE / QT_IM_MODULE を
-  # あえて設定せず、Wayland の text-input プロトコルでアプリに渡す。Niri も
-  # Ghostty も Zen も対応しているのでこちらが素直で、XWayland のアプリ向けには
-  # モジュールが XMODIFIERS=@im=fcitx を立ててくれる。
-  #
-  # このモジュールは fcitx5 を起動する user サービスを作らない。Niri を
-  # `niri --session` ではなく素で起動していて graphical-session.target が
-  # 立たないこともあり、起動は niri の spawn-at-startup に任せてある
-  # (dot_config/niri/config.kdl)。
+  # 日本語入力は Wayland の text-input を使う。XWayland 用の設定はモジュールが行う。
+  # Niri をセッションとして起動しないため、fcitx5 の起動は dot_config/niri/config.kdl で行う。
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";
@@ -72,8 +77,7 @@ in
     };
   };
 
-  # Establish the same appearance defaults GNOME applications expect. Noctalia's
-  # GTK templates update the color-scheme value when its light/dark mode changes.
+  # GNOME アプリの外観の初期値。明暗の切り替えは Noctalia の GTK テンプレートが行う。
   systemd.user.services.desktop-theme = {
     description = "Apply consistent desktop appearance defaults";
     wantedBy = [ "default.target" ];
@@ -102,9 +106,18 @@ in
     ];
 
     fontconfig.defaultFonts = {
-      monospace = [ "JetBrainsMono Nerd Font" "Noto Sans Mono CJK JP" ];
-      sansSerif = [ "Noto Sans CJK JP" "Noto Sans" ];
-      serif = [ "Noto Serif CJK JP" "Noto Serif" ];
+      monospace = [
+        "JetBrainsMono Nerd Font"
+        "Noto Sans Mono CJK JP"
+      ];
+      sansSerif = [
+        "Noto Sans CJK JP"
+        "Noto Sans"
+      ];
+      serif = [
+        "Noto Serif CJK JP"
+        "Noto Serif"
+      ];
       emoji = [ "Noto Color Emoji" ];
     };
   };

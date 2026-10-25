@@ -9,6 +9,7 @@
 
   wsl = {
     enable = true;
+    useWindowsDriver = true;
     interop.register = true;
     wslConf.interop = {
       enabled = true;
@@ -17,20 +18,17 @@
     defaultUser = "nixos";
   };
 
-  # home-manager は NixOS モジュールとして動かす。nixos-rebuild 一回で
-  # システムとユーザー領域の両方が切り替わる。
+  hardware.graphics.enable = true;
+
+  # システムとユーザーの設定を nixos-rebuild で同時に反映する。
   home-manager = {
-    # システム側で評価した pkgs をそのまま使う。ユーザー用に nixpkgs を
-    # もう一度評価しないので、rebuild が余分に遅くならない。
+    # nixpkgs の再評価を避け、システムと同じパッケージ集合を使う。
     useGlobalPkgs = true;
-    # NixOS の specialArgs は home-manager のユーザー設定には渡らないため、
-    # flake input から Codex を取得するために明示的に渡す。
+    # 外部入力は Home Manager にも明示的に渡す。
     extraSpecialArgs = { inherit inputs; };
-    # パッケージを /etc/profiles/per-user/nixos に置く。ここは既に PATH に
-    # 入っているので、シェル側の設定は要らない。
+    # ユーザーのパッケージを PATH に含まれる /etc/profiles/per-user/nixos に置く。
     useUserPackages = true;
-    # chezmoi が置いたファイルと衝突したとき、失敗させず退避させる。
-    # rebuild が途中で止まるより、後から差分を見て潰す方が扱いやすい。
+    # 既存ファイルと衝突した場合は退避する。
     backupFileExtension = "hm-bak";
     users.nixos = import ./home.nix;
   };

@@ -1,34 +1,28 @@
 ## Tool Use
-If you plan to use openspec, please use `bunx @fission-ai/openspec`.
 
-## File operations
-
-Prefer git commands for file operations on tracked files:
-- `git mv <src> <dst>` instead of `mv` for renaming/moving
-- `git rm <file>` instead of `rm` for deleting
-- `git rm -r <dir>` instead of `rm -rf` for deleting directories
-
-Use plain `mv`/`rm` only for untracked files (e.g. build artifacts, temp files).
-
-## Working-copy snapshots
-
-Use Jujutsu to preserve the working copy. In a Git repository that is not yet managed by Jujutsu, run `jj git init --colocate` once.
-
-Before returning control to the user, run `jj status`. Jujutsu snapshots the working copy whenever a command runs, so the work is preserved even when it is incomplete. A clean Git worktree or a WIP commit is not required.
-
-Use `jj status` for routine in-progress snapshots. These snapshots may remain only in Jujutsu's operation history and do not need to appear as separate Git commits.
-
-When a meaningful, verified unit of work is complete, preserve it in the commit history before continuing:
+OpenSpecは次のコマンドで実行する。
 
 ```sh
-jj describe -m "<summary>"
-jj new
+bunx @fission-ai/openspec
 ```
 
-This keeps lightweight intermediate snapshots out of the pushed Git history while retaining meaningful milestones as commits.
+## File Operations
 
-# Japanese Output Rule
-修飾表現禁止
-日本で広く浸透している訳語が存在する語の英化禁止
-技術的事項は注釈を付け背景や詳細を説明
-過度な改行の使用禁止
+追跡済みファイルの移動と削除はGitコマンドで行う。
+
+- 移動・改名: `git mv <src> <dst>`（`mv` は使わない）
+- ファイル削除: `git rm <file>`（`rm` は使わない）
+- ディレクトリ削除: `git rm -r <dir>`（`rm -rf` は使わない）
+
+`mv` と `rm` は、未追跡ファイル（ビルド成果物、一時ファイルなど）にのみ使う。
+
+## Commits
+
+動作確認が済んだ作業単位ごとに、Gitでコミットする。
+
+## Japanese Output Rules
+
+- 修飾表現を使わない。形容詞・副詞による強調や評価（「非常に」「とても」「素晴らしい」など）を避け、事実のみを書く。
+- 日本語で定着した訳語がある語は、英語に置き換えず訳語を使う（例: 「server」ではなく「サーバー」）。
+- 技術用語には注釈を付け、背景と詳細を説明する。初出の語のみ注釈し、2回目以降は省略する。
+- 改行は段落の区切りにのみ使う。1文ごとの改行や、連続する空行を作らない。
