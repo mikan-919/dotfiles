@@ -1,6 +1,8 @@
-# mikan dotfiles
+<h1 align="center">mikan dotfiles</h1>
 
-[chezmoi](https://chezmoi.io) で管理している dotfiles です。
+<p align="center"><a href="https://chezmoi.io">chezmoi</a> で管理する個人設定</p>
+
+<p align="center"><a href="#初回セットアップ">初回セットアップ</a> · <a href="#日常の使い方">日常の使い方</a> · <a href="#構成">構成</a> · <a href="#os別のセットアップ">OS別のセットアップ</a> · <a href="#zsh-の対話環境">zsh</a> · <a href="#nix-の運用">Nix</a> · <a href="#仕組み">仕組み</a></p>
 
 ## 初回セットアップ
 
