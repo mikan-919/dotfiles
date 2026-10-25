@@ -124,7 +124,8 @@ chezmoi diff
 chezmoi apply
 ```
 
-NixOSでは `paru` を使わず、パッケージはすべて `nixos/packages.nix` から管理します。
+NixOSでは `paru` を使わず、共通パッケージは `nixos/packages.nix`、ユーザー用は
+`nixos/home.nix` から管理します。
 
 ### 主なツール
 
@@ -148,6 +149,7 @@ NixOSでは `paru` を使わず、パッケージはすべて `nixos/packages.ni
 - **nix-ld** - NixOS 以外向けのプリビルドバイナリを動かすローダ
 - **fcitx5-mozc** - 日本語入力
 - **Vite+** - Web開発の統合ツールチェーン (`vp`)
+- **oh-my-pi** - 端末で使うコード編集AI (`omp`)
 - **sheldon** - zsh プラグインマネージャ
 - **zsh-defer** - プラグインの遅延読み込み
 - **fzf-tab** - タブ補完を fzf に置き換える。候補のプレビュー付き

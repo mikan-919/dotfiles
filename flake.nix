@@ -24,6 +24,8 @@
     # 配布元が固定する nixpkgs とビルド済み成果物を使うため、follows は指定しない。
     llm-agents.url = "github:numtide/llm-agents.nix";
 
+    omp.url = "github:can1357/oh-my-pi";
+
     nix-vite-plus = {
       url = "github:ryoppippi/nix-vite-plus";
       inputs.nixpkgs.follows = "nixpkgs";

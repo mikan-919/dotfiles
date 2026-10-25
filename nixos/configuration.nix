@@ -9,6 +9,7 @@
 
   wsl = {
     enable = true;
+    useWindowsDriver = true;
     interop.register = true;
     wslConf.interop = {
       enabled = true;
@@ -16,6 +17,8 @@
     };
     defaultUser = "nixos";
   };
+
+  hardware.graphics.enable = true;
 
   # システムとユーザーの設定を nixos-rebuild で同時に反映する。
   home-manager = {

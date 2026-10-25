@@ -6,15 +6,20 @@ let
   fxAgent = pkgs.callPackage ./pkgs/fx.nix { };
 in
 {
+  imports = [ inputs.omp.homeManagerModules.default ];
+
   # 設定ファイルと環境変数は chezmoi、パッケージと既定アプリは Home Manager で管理する。
   # zsh などの設定生成は有効にしない。環境変数は dot_config/zsh/sync/exports.zsh に置く。
 
   home.stateVersion = "24.05";
 
+  programs.omp.enable = true;
+
   # ユーザー用の開発支援ツール。
   home.packages = with pkgs; [
     claude-code
-    codex
+    llmAgents.codex
+    llmAgents.dsh
     fxAgent
     repomix
   ];
