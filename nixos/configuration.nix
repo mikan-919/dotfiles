@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   imports = [
@@ -16,6 +16,21 @@
       appendWindowsPath = true;
     };
     defaultUser = "nixos";
+    # Windows 側の Zed は wsl.exe --exec でシェルを通さずに cp などを呼び、WSL 側へ拡張機能を送る。
+    # NixOS には /bin/cp などが無いので、呼ばれるコマンドを /bin に置く。
+    extraBin = with pkgs; [
+      { src = "${coreutils}/bin/cp"; }
+      { src = "${coreutils}/bin/mv"; }
+      { src = "${coreutils}/bin/rm"; }
+      { src = "${coreutils}/bin/mkdir"; }
+      { src = "${coreutils}/bin/ls"; }
+      { src = "${coreutils}/bin/cat"; }
+      { src = "${coreutils}/bin/chmod"; }
+      { src = "${coreutils}/bin/uname"; }
+      { src = "${coreutils}/bin/dirname"; }
+      { src = "${gnutar}/bin/tar"; }
+      { src = "${gzip}/bin/gzip"; }
+    ];
   };
 
   hardware.graphics.enable = true;
