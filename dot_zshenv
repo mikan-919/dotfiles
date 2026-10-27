@@ -9,3 +9,6 @@ setopt no_global_rcs
 
 # cargo install で入れたコマンド（hibana など）。対話でないシェルも読む .zshenv に置き、Zed の WSL 側からも見つかるようにする。
 [[ -d $HOME/.cargo/bin ]] && path=( $HOME/.cargo/bin $path )
+
+# Vite+ bin (https://viteplus.dev)
+. "$HOME/.config/vite-plus/env"
