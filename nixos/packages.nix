@@ -46,6 +46,8 @@ in
     vitePlus
     glib
     glib.dev
+    libsecret
+    libsecret.dev
     pkg-config
 
     # エディター
