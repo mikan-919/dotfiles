@@ -26,6 +26,20 @@
 
     # 未コミットの変更に対する警告を抑制する。
     warn-dirty = false;
+
+    # 既定値（16 ジョブ × 全 16 コア）では CPU とメモリを使い切り、画面が固まる。同時ビルド数と 1 ビルドあたりのスレッド数を抑える。
+    max-jobs = 4;
+    cores = 4;
+  };
+
+  # ビルドの CPU と I/O（ディスク読み書き）の優先度を最低にし、操作中のプログラムを先に動かす。
+  nix.daemonCPUSchedPolicy = "idle";
+  nix.daemonIOSchedClass = "idle";
+
+  # ビルドのメモリ使用量を制限する。MemoryHigh を超えるとスワップへ追い出し、MemoryMax を超えるとビルドだけを強制終了する。
+  systemd.services.nix-daemon.serviceConfig = {
+    MemoryHigh = "60%";
+    MemoryMax = "80%";
   };
 
   # ストアの重複ファイルを週次でハードリンクにまとめる。
@@ -58,7 +72,7 @@
 
   # `, cowsay` のように、未導入のコマンドを一度だけ実行する。
   programs.nix-index-database.comma.enable = true;
-
+  services.gnome.gnome-keyring.enable = true;
   # zsh 設定から読み込む検索スクリプトを /etc に配置する。
   environment.etc."zsh/command-not-found.zsh".source =
     "${pkgs.nix-index}/etc/profile.d/command-not-found.sh";
