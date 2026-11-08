@@ -35,6 +35,10 @@
 
   hardware.graphics.enable = true;
 
+  # Docker デーモン（コンテナを管理する常駐プロセス）を動かし、nixos ユーザーが sudo なしで docker を使えるようにする。
+  virtualisation.docker.enable = true;
+  users.users.nixos.extraGroups = [ "docker" ];
+
   # システムとユーザーの設定を nixos-rebuild で同時に反映する。
   home-manager = {
     # nixpkgs の再評価を避け、システムと同じパッケージ集合を使う。
