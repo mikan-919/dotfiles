@@ -88,6 +88,25 @@
       icu
       libxml2
       libxcrypt-legacy
+
+      # T3 Code が取得する Chrome Headless Shell の実行時依存。
+      alsa-lib
+      at-spi2-core
+      dbus
+      expat
+      glib
+      libgbm
+      libx11
+      libxcb
+      libxcomposite
+      libxdamage
+      libxext
+      libxfixes
+      libxkbcommon
+      libxrandr
+      nspr
+      nss
+      systemd
     ];
   };
 
