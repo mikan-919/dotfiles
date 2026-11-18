@@ -21,6 +21,7 @@ in
     llmAgents.codex
     llmAgents.dsh
     fxAgent
+    opencode
     repomix
   ];
 
