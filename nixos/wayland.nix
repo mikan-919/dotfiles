@@ -85,6 +85,7 @@ in
 
   fonts = {
     packages = with pkgs; [
+      (callPackage ./pkgs/line-seed-jp.nix { })
       nerd-fonts.jetbrains-mono
       noto-fonts
       noto-fonts-cjk-sans
